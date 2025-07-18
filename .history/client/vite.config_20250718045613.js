@@ -19,7 +19,7 @@ export default defineConfig({
     ],
     server: {
         proxy: {
-            "/api": "http://localhost:5010",
+            "/api": "http://localhost:5009",
         },
         host: true,
         port: 3002, // change to any desired port
