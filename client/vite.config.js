@@ -1,9 +1,10 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 
 // https://vite.dev/config/
 export default defineConfig({
-    plugins: [react()],
+    plugins: [react(), tailwindcss()],
     assetsInclude: [
         "**/*.xlsx",
         "**/*.pdf",
@@ -19,9 +20,9 @@ export default defineConfig({
     ],
     server: {
         proxy: {
-            "/api": "http://localhost:5010",
+            "/api": "http://localhost:5009",
         },
         host: true,
-        port: 3002, // change to any desired port
+        port: 3001, // change to any desired port
     },
 });
