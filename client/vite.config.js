@@ -23,6 +23,6 @@ export default defineConfig({
             "/api": "http://localhost:5009",
         },
         host: true,
-        port: 3001, // change to any desired port
+        port: 3002, // change to any desired port
     },
 });

@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
-export default function BlankReport() {
+export default function FIReport() {
   const [rows, setRows] = useState([
     {
       details: "",

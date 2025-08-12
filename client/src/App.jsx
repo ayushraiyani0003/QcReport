@@ -1,27 +1,41 @@
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-import Dashbord from "./Componant/Dashboard";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import Login from "./Componant/Login";
-import BlankReport from "./Componant/BlankReport";
-import UserList from "./Componant/userlist";
+import Dashboard from "./feature/dashboard/page/Dashboard";
+import ISReport from "./feature/ISReport/ISReport";
+import FIReport from "./feature/FIReport/FIReport";
+import UserList from "./feature/userList/pages/UserList";
 import Setting from "./Componant/setting";
-import Header from "./Componant/Header";
-import ReportForm from "./Componant/blankreport2";
-import TableComponent from "./Componant/table";
+import ErrorPage from "./components/errorpage";
 
+import MainLayout from "./Layout/MainLayout";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-export default function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/dashboard" element={<Dashbord />} />
-        <Route path="/blank-report" element={<BlankReport />} />
-        <Route path="/userlist" element={<UserList />} />
-        <Route path="/setting" element={<Setting />} />
-        <Route path="/header" element={<Header />} />
-        <Route path="/blankreport2" element={<ReportForm />} />
-        <Route path ="/table" element={<TableComponent/>}/>
-      </Routes>
-    </BrowserRouter>
-  );
-}
+const App = () => {
+    return (
+        <BrowserRouter>
+            <Routes>
+                <Route path="/login" element={<Login />} />
+
+                <Route
+                    path="/"
+                    element={
+                        <ProtectedRoute>
+                            <MainLayout />
+                        </ProtectedRoute>
+                    }
+                >
+                    <Route index element={<Dashboard />} />
+                    <Route path="dashboard" element={<Dashboard />} />
+                    <Route path="fi-report" element={<FIReport />} />
+                    <Route path="userlist" element={<UserList />} />
+                    <Route path="settings" element={<Setting />} />
+                    <Route path="is-report" element={<ISReport />} />
+                    <Route path="*" element={<ErrorPage />} />
+                </Route>
+            </Routes>
+        </BrowserRouter>
+    );
+};
+
+export default App;
