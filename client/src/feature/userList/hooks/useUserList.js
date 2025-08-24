@@ -1,136 +1,200 @@
 import { useState, useEffect, useRef } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import {
+    fetchAllUsers,
+    selectUsers,
+    selectLoading,
+    selectError,
+    updateUser,
+    createUser,
+    deleteUser,
+} from "../../../store/UserListSlice";
 
 const useUserList = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
-  const [rows, setRows] = useState([
-    {
-      id: "USR001",
-      name: "John Doe",
-      role: "Frontend Developer",
-      joined: "2024-01-15",
-    },
-    {
-      id: "USR002",
-      name: "Jane Smith",
-      role: "Product Manager",
-      joined: "2023-11-20",
-    },
-    {
-      id: "USR003",
-      name: "Mike Johnson",
-      role: "UI/UX Designer",
-      joined: "2024-03-10",
-    },
-    {
-      id: "USR004",
-      name: "Mike jon",
-      role: "UI/UX Designer",
-      joined: "2024-03-10",
-    },
-  ]);
-  const modelRef = useRef();
+    const dispatch = useDispatch();
 
-  const [formData, setFormData] = useState({
-    id: "",
-    name: "",
-    role: "",
-    joined: "",
-  });
+    // Redux selectors
+    const rows = useSelector(selectUsers);
+    const loading = useSelector(selectLoading);
+    const error = useSelector(selectError);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        isModalOpen &&
-        modelRef.current &&
-        !modelRef.current.contains(event.target)
-      ) {
-        handleCloseModal();
-      }
-    };
+    // Predefined roles for dropdown - expanded with more options
+    const roles = ["Admin", "User"];
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isModalOpen]);
+    // Local state for modal and form management
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingUser, setEditingUser] = useState(null);
+    const modelRef = useRef();
 
-  const handleOpenModal = (user = null) => {
-    setEditingUser(user);
-    setFormData(
-      user || {
-        id: "",
+    const [formData, setFormData] = useState({
+        userName: "",
         name: "",
-        role: "",
+        userRoll: "",
         joined: "",
-      }
-    );
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setEditingUser(null);
-    setFormData({ id: "", name: "", role: "", joined: "" });
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    console.log(name, value);
-    console.log(formData);
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSaveUser = () => {
-    // Basic validation
-    if (!formData.id || !formData.name || !formData.role || !formData.joined) {
-      alert("Please fill in all fields");
-      return;
-    }
-
-    if (editingUser) {
-      setRows(rows.map((r) => (r.id === editingUser.id ? formData : r)));
-    } else {
-      // Check if ID already exists
-      if (rows.some((r) => r.id === formData.id)) {
-        alert("User ID already exists");
-        return;
-      }
-      setRows([...rows, formData]);
-    }
-
-    handleCloseModal();
-  };
-
-  const handleDelete = (userId) => {
-    setRows(rows.filter((r) => r.id !== userId));
-  };
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
+        password: "",
     });
-  };
 
-  return {
-    isModalOpen,
-    rows,
-    modelRef,
-    editingUser, // Add this
-    formData, // Add this
-    handleCloseModal,
-    handleOpenModal,
-    handleSaveUser,
-    handleDelete,
-    handleInputChange,
-    formatDate,
-  };
+    // Fetch users on component mount
+    useEffect(() => {
+        dispatch(fetchAllUsers());
+    }, [dispatch]);
+
+    // Handle click outside modal
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                isModalOpen &&
+                modelRef.current &&
+                !modelRef.current.contains(event.target)
+            ) {
+                handleCloseModal();
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isModalOpen]);
+
+    const handleOpenModal = (user = null) => {
+        setEditingUser(user);
+        if (user) {
+            // For editing: set user data but keep password empty
+            setFormData({
+                userName: user.userName,
+                name: user.name,
+                userRoll: user.userRoll,
+                joined: user.joined,
+                password: "", // Always empty for editing
+            });
+        } else {
+            // For new user: empty form
+            setFormData({
+                userName: "",
+                name: "",
+                userRoll: "",
+                joined: "",
+                password: "",
+            });
+        }
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setEditingUser(null);
+        setFormData({
+            userName: "",
+            name: "",
+            userRoll: "",
+            joined: "",
+            password: "",
+        });
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    const handleSaveUser = async () => {
+        // Basic validation - password is always required
+        if (
+            !formData.userName ||
+            !formData.name ||
+            !formData.userRoll ||
+            !formData.password
+        ) {
+            alert("Please fill in all fields including password");
+            return;
+        }
+
+        // Additional validation for editing - ensure password is provided
+        if (editingUser && !formData.password.trim()) {
+            alert("Please enter a new password");
+            return;
+        }
+
+        try {
+            // Add joined = today's date for new users, keep existing for editing
+            if (!editingUser) {
+                const today = new Date();
+                formData.joined = `${today.getFullYear()}-${
+                    today.getMonth() + 1
+                }-${today.getDate()}`;
+            }
+
+            if (editingUser) {
+                // Update existing user
+                await dispatch(
+                    updateUser({
+                        id: editingUser.id,
+                        userData: formData,
+                    })
+                ).unwrap();
+            } else {
+                // Check if ID already exists
+                if (rows.some((r) => r.userName === formData.userName)) {
+                    alert("User ID already exists");
+                    return;
+                }
+                // Add joined date for new user
+                const today = new Date();
+                const userDataWithDate = {
+                    ...formData,
+                    joined: `${today.getFullYear()}-${
+                        today.getMonth() + 1
+                    }-${today.getDate()}`,
+                };
+                // Create new user
+                await dispatch(createUser(userDataWithDate)).unwrap();
+            }
+            handleCloseModal();
+        } catch (error) {
+            console.error("Error saving user:", error);
+            alert("Error saving user. Please try again.");
+        }
+    };
+
+    const handleDelete = async (userId) => {
+        try {
+            await dispatch(deleteUser(userId)).unwrap();
+        } catch (error) {
+            console.error("Error deleting user:", error);
+            alert("Error deleting user. Please try again.");
+        }
+    };
+
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+        });
+    };
+
+    return {
+        isModalOpen,
+        rows,
+        loading: loading.fetchAll, // Specific loading state for fetchAll
+        error,
+        modelRef,
+        editingUser,
+        formData,
+        roles, // Available roles for dropdown
+        handleCloseModal,
+        handleOpenModal,
+        handleSaveUser,
+        handleDelete,
+        handleInputChange,
+        formatDate,
+    };
 };
 
 export default useUserList;
+
+// Error saving user: User ID is required

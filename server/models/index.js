@@ -6,8 +6,8 @@ const models = {};
 
 // Import all model definitions
 const UserList = require("./Userlist.model");
-const FIReport = require("./FIReport.model");
-const ISReport = require("./ISReport.models");
+const FIReport = require("../models/FIReport.model");
+const ISReport = require("../models/ISReport.models");
 
 // Initialize models - pass sequelize instance and DataTypes
 models.UserList = UserList(sequelize, Sequelize.DataTypes);

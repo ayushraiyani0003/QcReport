@@ -12,30 +12,32 @@ import MainLayout from "./Layout/MainLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const App = () => {
-    return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/login" element={<Login />} />
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
 
-                <Route
-                    path="/"
-                    element={
-                        <ProtectedRoute>
-                            <MainLayout />
-                        </ProtectedRoute>
-                    }
-                >
-                    <Route index element={<Dashboard />} />
-                    <Route path="dashboard" element={<Dashboard />} />
-                    <Route path="fi-report" element={<FIReport />} />
-                    <Route path="userlist" element={<UserList />} />
-                    <Route path="settings" element={<Setting />} />
-                    <Route path="is-report" element={<ISReport />} />
-                    <Route path="*" element={<ErrorPage />} />
-                </Route>
-            </Routes>
-        </BrowserRouter>
-    );
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <MainLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Dashboard />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="fi-report" element={<FIReport />} />
+          <Route path="fi-report/:id" element={<FIReport />} />
+          <Route path="userlist" element={<UserList />} />
+          <Route path="settings" element={<Setting />} />
+          <Route path="is-report" element={<ISReport />} />
+          <Route path="is-report/:id" element={<ISReport />} />
+          <Route path="*" element={<ErrorPage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
 };
 
 export default App;

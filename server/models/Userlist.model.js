@@ -9,20 +9,19 @@
  * @returns {import('sequelize').Model} The UserList model
  */
 /**
-     * UserList Model Definition
-     *
-     * @typedef {Object} UserListAttributes
-     * @property {string} id - Unique UUID identifier for the user
-     * @property {string} userName - Unique username for login
-     * @property {string} name - Full display name of the user
-     * @property {'Admin'|'User'} requirement_type - User role/permission level
-     * @property {string} joined - Date when user joined (YYYY-MM-DD format)
-     * @property {string} password - Encrypted password (6-255 characters)
-     * @property {Date} createdAt - Timestamp when record was created (auto-generated)
-     * @property {Date} updatedAt - Timestamp when record was last updated (auto-generated)
-     */
+ * UserList Model Definition
+ *
+ * @typedef {Object} UserListAttributes
+ * @property {string} id - Unique UUID identifier for the user
+ * @property {string} userName - Unique username for login
+ * @property {string} name - Full display name of the user
+ * @property {'Admin'|'User'} requirement_type - User role/permission level
+ * @property {string} joined - Date when user joined (YYYY-MM-DD format)
+ * @property {string} password - Encrypted password (6-255 characters)
+ * @property {Date} createdAt - Timestamp when record was created (auto-generated)
+ * @property {Date} updatedAt - Timestamp when record was last updated (auto-generated)
+ */
 module.exports = (sequelize, DataTypes) => {
-    
     const UserList = sequelize.define(
         "UserList",
         {
@@ -32,7 +31,7 @@ module.exports = (sequelize, DataTypes) => {
              */
             id: {
                 type: DataTypes.UUID,
-                defaultValue:DataTypes.UUIDV4,
+                defaultValue: DataTypes.UUIDV4,
                 primaryKey: true,
                 allowNull: false,
             },

@@ -21,6 +21,21 @@ module.exports = (sequelize) => {
       },
 
       // === Basic Report Information ===
+      /** @type {string} Name/title of the report (usually Drawing No.) */
+      reportName: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      /** @type {string} Name of the client/customer for easy reference */
+      clientName: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      /** @type {Object} Complete form data structure stored as JSON for editing */
+      // blankReportData: {
+      //   type: DataTypes.JSON,
+      //   allowNull: true,
+      // },
       /** @type {string} Name of the supplier sending the report */
       senderSupplier: {
         type: DataTypes.STRING,

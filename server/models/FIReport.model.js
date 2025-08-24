@@ -33,10 +33,10 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true, // Fixed: removed duplicate allowNull declarations
       },
       /** @type {string} Current status of the report (e.g., 'draft', 'pending', 'approved', 'rejected') */
-      status: {
-        type: DataTypes.STRING,
-        allowNull: true, // Fixed: removed duplicate allowNull declarations
-      },
+      // status: {
+      //   type: DataTypes.STRING,
+      //   allowNull: true, // Fixed: removed duplicate allowNull declarations
+      // },
 
       // === Report Types and Components ===
       /** @type {boolean} Indicates if final inspection report follows VDA standards */
@@ -162,6 +162,16 @@ module.exports = (sequelize, DataTypes) => {
        */
       customerFiledData: {
         type: DataTypes.JSON,
+        allowNull: true,
+      },
+
+      // === Extra fields for saving from frontend ===
+      // rows: {
+      //   type: DataTypes.JSON, // 🔹 table rows from frontend
+      //   allowNull: true,
+      // },
+      remarks: {
+        type: DataTypes.TEXT, // 🔹 remarks from frontend
         allowNull: true,
       },
 

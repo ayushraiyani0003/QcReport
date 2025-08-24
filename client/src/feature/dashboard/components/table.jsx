@@ -1,125 +1,229 @@
 import React from "react";
-import { Eye, Copy, Edit, Trash2, FileText } from "lucide-react";
+import {
+  Edit2,
+  Trash2,
+  Eye,
+  Copy,
+  FileText,
+  Shield,
+  Clock,
+  CheckCircle,
+} from "lucide-react";
 
-const TableComponent = ({ reportData, onEdit, onCopy, onDelete }) => {
-  // Column width configuration
-  const COLUMN_WIDTHS = {
-    index: "60px",
-    reportName: "2fr",
-    clientNumber: "1fr",
-    deadline: "1fr",
-    status: "1fr",
-    type: "1fr",
-    actions: "140px",
+const EnhancedTableComponent = ({
+  reportData,
+  onEdit,
+  onDelete,
+  onView,
+  // onCopy,
+  formatDate,
+  loading = false,
+}) => {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <span className="ml-3 text-gray-600">Loading reports...</span>
+      </div>
+    );
+  }
+
+  if (!reportData || reportData.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <FileText className="mx-auto h-12 w-12 text-gray-400" />
+        <h3 className="mt-2 text-sm font-medium text-gray-900">
+          No reports found
+        </h3>
+        <p className="mt-1 text-sm text-gray-500">
+          Try adjusting your search or filter criteria
+        </p>
+      </div>
+    );
+  }
+
+  const getReportTypeIcon = (reportType) => {
+    if (reportType === "FI Report") {
+      return <FileText className="w-4 h-4 text-blue-600" />;
+    }
+    return <Shield className="w-4 h-4 text-green-600" />;
   };
 
-  // Generate grid template from configuration
-  const gridTemplate = Object.values(COLUMN_WIDTHS).join(" ");
+  const getStatusBadge = (item) => {
+    const baseClasses =
+      "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
+
+    if (item.isComplete) {
+      return (
+        <span className={`${baseClasses} bg-green-100 text-green-800`}>
+          <CheckCircle className="w-3 h-3 mr-1" />
+          Completed
+        </span>
+      );
+    }
+
+    return (
+      <span className={`${baseClasses} bg-orange-100 text-orange-800`}>
+        <Clock className="w-3 h-3 mr-1" />
+        Pending
+      </span>
+    );
+  };
+
+  const getReportTypeBadge = (reportType) => {
+    const baseClasses =
+      "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
+
+    if (reportType === "FI Report") {
+      return (
+        <span className={`${baseClasses} bg-blue-100 text-blue-800`}>
+          <FileText className="w-3 h-3 mr-1" />
+          FI Report
+        </span>
+      );
+    }
+
+    return (
+      <span className={`${baseClasses} bg-green-100 text-green-800`}>
+        <Shield className="w-3 h-3 mr-1" />
+        IS Report
+      </span>
+    );
+  };
 
   return (
-    <div className="bg-white flex flex-col h-[91.5%]">
-      {/* Table Header - Fixed */}
-      <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200 flex-shrink-0">
-        <div
-          className="grid gap-4 text-sm font-semibold text-gray-700"
-          style={{
-            gridTemplateColumns: gridTemplate,
-          }}
-        >
-          <div className="text-center">#</div>
-          <div>Report Name</div>
-          <div>Client Number</div>
-          <div>Deadline</div>
-          <div>Status</div>
-          <div>Type</div>
-          <div className="text-center">Actions</div>
-        </div>
+    <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200">
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Report Name
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Client
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Deadline
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Report Type
+              </th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {reportData.map((item, index) => (
+              <tr
+                key={`${item.dataSource}-${item.id}`}
+                className={`hover:bg-gray-50 transition-colors duration-150 ${
+                  index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                }`}
+              >
+                <td className="px-6 py-4">
+                  <div className="flex items-center">
+                    {getReportTypeIcon(item.reportType)}
+                    <div className="ml-3">
+                      <div className="text-sm font-medium text-gray-900 line-clamp-2">
+                        {item.name}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        ID: {item.id.substring(0, 8)}...
+                      </div>
+                    </div>
+                  </div>
+                </td>
+
+                <td className="px-6 py-4">
+                  <div className="text-sm text-gray-900">{item.clientName}</div>
+                  {/* <div className="text-sm text-gray-500">
+                    #{item.clientNumber}
+                  </div> */}
+                </td>
+
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">
+                    {formatDate(item.deadline)}
+                  </div>
+                </td>
+
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {getStatusBadge(item)}
+                </td>
+
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {getReportTypeBadge(item.reportType)}
+                </td>
+
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <div className="flex items-center justify-end space-x-2">
+                    <button
+                      onClick={() => onView(item)}
+                      className="text-indigo-600 hover:text-indigo-900 p-2 hover:bg-indigo-50 rounded-lg transition-colors duration-150"
+                      title="View Report"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </button>
+
+                    <button
+                      onClick={() => onEdit(item)}
+                      className="text-blue-600 hover:text-blue-900 p-2 hover:bg-blue-50 rounded-lg transition-colors duration-150"
+                      title="Edit Report"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+
+                    {/* <button
+                      onClick={() => onCopy(item)}
+                      className="text-green-600 hover:text-green-900 p-2 hover:bg-green-50 rounded-lg transition-colors duration-150"
+                      title="Copy Report"
+                    >
+                      <Copy className="w-4 h-4" />
+                    </button> */}
+
+                    <button
+                      onClick={() => onDelete(item)}
+                      className="text-red-600 hover:text-red-900 p-2 hover:bg-red-50 rounded-lg transition-colors duration-150"
+                      title="Delete Report"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      {/* Table Body - Scrollable */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden">
-        <div className="divide-y divide-gray-100 pb-4">
-          {reportData.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
-              <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-              <p className="text-lg font-medium">No reports found</p>
-              <p className="text-sm">Try adjusting your search or filters</p>
-            </div>
-          ) : (
-            [...reportData].reverse().map((item, index) => (
-              <div
-                key={item.id}
-                className="grid gap-4 px-6 py-0 hover:bg-gray-50 transition-colors duration-150 min-h-[50px]"
-                style={{
-                  gridTemplateColumns: gridTemplate,
-                }}
-              >
-                <div className="text-center text-sm text-gray-600 font-medium flex items-center justify-center h-full">
-                  {reportData.length - index}
-                </div>
-                <div className="font-medium text-gray-900 flex items-center h-full">
-                  <span className="truncate">{item.name}</span>
-                </div>
-                <div className="text-gray-600 font-mono text-sm flex items-center h-full">
-                  <span className="truncate">{item.clientNumber || "N/A"}</span>
-                </div>
-                <div className="text-gray-600 text-sm flex items-center h-full">
-                  {`${item.deadline.getDate().toString().padStart(2, "0")}-${(
-                    item.deadline.getMonth() + 1
-                  )
-                    .toString()
-                    .padStart(2, "0")}-${item.deadline.getFullYear()}`}
-                </div>
-                <div className="flex items-center h-full">
-                  <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      item.isComplete
-                        ? "bg-green-100 text-green-800 border border-green-200"
-                        : "bg-orange-100 text-orange-800 border border-orange-200"
-                    }`}
-                  >
-                    {item.isComplete ? "Completed" : "In Progress"}
-                  </span>
-                </div>
-                <div className="text-gray-600 text-sm flex items-center h-full">
-                  <span className="truncate">{item.type || "N/A"}</span>
-                </div>
-                <div className="flex items-center justify-center gap-1 h-full">
-                  <button
-                    onClick={() => console.log("Open", item)}
-                    className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-150 group"
-                    title="View Report"
-                  >
-                    <Eye className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => onCopy(item)}
-                    className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-150 group"
-                    title="Copy Report"
-                  >
-                    <Copy className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => onEdit(item)}
-                    className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors duration-150 group"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => onDelete(item)}
-                    className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150 group"
-                    title="Delete Report"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
+      <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
+        <div className="flex items-center justify-between text-sm text-gray-600">
+          <span>
+            Showing {reportData.length} report
+            {reportData.length !== 1 ? "s" : ""}
+          </span>
+          <div className="flex items-center space-x-4">
+            <span>
+              {reportData.filter((item) => item.dataSource === "FI").length} FI
+              Reports
+            </span>
+            <span>
+              {reportData.filter((item) => item.dataSource === "IS").length} IS
+              Reports
+            </span>
+            <span>
+              {reportData.filter((item) => item.isComplete).length} Completed
+            </span>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default TableComponent;
+export default EnhancedTableComponent;
