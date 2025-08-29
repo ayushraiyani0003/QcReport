@@ -1,905 +1,1072 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Report Form</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body class="font-sans text-sm">
-    <div class="max-w-5xl mx-auto p-4 border border-black">
-      <div></div>
-      <!-- Supplier & Report Type -->
-      <div class="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <div class="font-bold mb-1 mt-4">Sender/supplier:</div>
-          <textarea type="text" class="border border-black w-full h-20 p-1">
-          </textarea>
-        </div>
-        <div>
-          <label class="block mb-1"
-            ><input type="checkbox" checked /> Initial Sample Report VDA</label
-          >
-          <label class="block ml-5 mb-1"
-            ><input type="checkbox" checked /> First Sample</label
-          >
-          <label class="block ml-5 mb-1"
-            ><input type="checkbox" /> Following sample report</label
-          >
-          <label class="block mb-1"
-            ><input type="checkbox" />
-            <strong>Test report of other samples</strong></label
-          >
-          <!-- <input type="text" class="w-full 1 mt-1 px-1 border border-black" /> -->
-        </div>
-      </div>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Report Form</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="font-sans text-sm">
+        <div class="max-w-5xl mx-auto p-4 border border-black">
+            <div></div>
+            <!-- Supplier & Report Type -->
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="border border-black w-full h-28 p-1">
+                    <div class="font-bold mb-1 mt-4">Sender/supplier:</div>
+                    <span class="w-full h-20 p-1">{{sender_supplier}}</span>
+                </div>
+                <div>
+                    <label class="block mb-1"
+                        ><input type="checkbox" checked /> Initial Sample Report
+                        VDA</label
+                    >
+                    <label class="block ml-5 mb-1"
+                        ><input type="checkbox" checked /> First Sample</label
+                    >
+                    <label class="block ml-5 mb-1"
+                        ><input type="checkbox" /> Following sample
+                        report</label
+                    >
+                    <label class="block mb-1"
+                        ><input type="checkbox" />
+                        <strong>Test report of other samples</strong></label
+                    >
+                    <!-- <input type="text" class="w-full 1 mt-1 px-1 border border-black" /> -->
+                </div>
+            </div>
 
-      <!-- Receiver & Enclosures -->
-      <div class="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <div class="font-bold mb-1">Receiver/customer ( Name/ Code ):</div>
-          <textarea type="text" class="border border-black w-full h-20 p-1">
-          </textarea>
-        </div>
-        <div>
-          <div class="font-bold mb-1">Enclosures:</div>
-          <div class="grid grid-cols-2 gap-x-8 gap-y-1">
-            <label> 1) <input type="checkbox" /> function report</label>
-            <label>
-              10) <input type="checkbox" /> haptics / visual inspection</label
+            <!-- Receiver & Enclosures -->
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <div class="font-bold mb-1">
+                        Receiver/customer ( Name/ Code ):
+                    </div>
+                    <textarea
+                        type="text"
+                        class="border border-black w-full h-20 p-1"
+                    >
+                    </textarea>
+                </div>
+                <div>
+                    <div class="font-bold mb-1">Enclosures:</div>
+                    <div class="grid grid-cols-2 gap-x-8 gap-y-1">
+                        <label>
+                            1) <input type="checkbox" /> function report</label
+                        >
+                        <label>
+                            10) <input type="checkbox" /> haptics / visual
+                            inspection</label
+                        >
+                        <label>
+                            2) <input type="checkbox" checked /> dimension
+                            report</label
+                        >
+                        <label> 11) <input type="checkbox" /> acoustics</label>
+                        <label>
+                            3) <input type="checkbox" checked /> material
+                            report</label
+                        >
+                        <label> 12) <input type="checkbox" /> odour</label>
+                        <label>
+                            4) <input type="checkbox" /> reliability test</label
+                        >
+                        <label
+                            >13) <input type="checkbox" /> list used
+                            compon./part record</label
+                        >
+                        <label
+                            >5) <input type="checkbox" /> Process capability
+                            certificate</label
+                        >
+                        <label
+                            >14) <input type="checkbox" /> certificates</label
+                        >
+                        <label> 6) <input type="checkbox" /> flow chart</label>
+                        <label
+                            >15) <input type="checkbox" /> release of
+                            construction</label
+                        >
+                        <label>
+                            7) <input type="checkbox" /> testing device
+                            capability</label
+                        >
+                        <label
+                            >16) <input type="checkbox" /> materials in bought
+                            parts</label
+                        >
+                        <label>
+                            8) <input type="checkbox" /> measuring
+                            methods</label
+                        >
+                        <label> 17) <input type="checkbox" /> others</label>
+                        <label>
+                            9) <input type="checkbox" /> security data
+                            sheets</label
+                        >
+                        <label>
+                            18) <input type="checkbox" /> deviation
+                            report</label
+                        >
+                    </div>
+                </div>
+            </div>
+
+            <!-- Header Row -->
+            <div class="grid grid-cols-2 border border-black text-sm"></div>
+
+            <!-- Form Grid -->
+            <div class="grid grid-cols-2 border-x border-black">
+                <!-- Left Column -->
+                <div>
+                    <div class="grid grid-cols-2">
+                        <!-- Supplier -->
+                        <div
+                            class="border-r border-black font-bold p-1 flex items-center"
+                        >
+                            Supplier
+                        </div>
+
+                        <!-- Supplier Number (Label + Input) -->
+                        <div class="border-r border-black p-1 grid grid-cols-2">
+                            <label class="block font-medium pt-2"
+                                >Supplier number:</label
+                            >
+                            <input
+                                type="text"
+                                class="border border-gray-300 p-1 mt-1"
+                                placeholder="Enter supplier no"
+                            />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 border-t border-black">
+                        <div class="border border-black 1 p-1">
+                            Test report-no.:
+                        </div>
+                        <div class="border border-black 1 p-1">
+                            <input
+                                type="text"
+                                class="w-full bg-transparent outline-none"
+                            />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 border-t border-black">
+                        <div class="border border-black 1 p-1">
+                            part no./ subject no.:
+                        </div>
+                        <div class="border border-black 1 p-1">
+                            <input
+                                type="text"
+                                class="w-full bg-transparent outline-none"
+                            />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 border-t border-black">
+                        <div class="border border-black 1 p-1">
+                            identification:
+                        </div>
+                        <div class="border border-black 1 p-1">
+                            <input
+                                type="text"
+                                class="w-full bg-transparent outline-none"
+                            />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 border-t border-black">
+                        <div class="border border-black p-1">drawing no.:</div>
+                        <div class="border border-black p-1">
+                            <input
+                                type="text"
+                                class="w-full bg-transparent outline-none"
+                            />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 border-t border-black">
+                        <div class="border border-black 1 p-1">
+                            level/date/index:
+                        </div>
+                        <div class="border border-black 1 p-1">
+                            <input
+                                type="text"
+                                class="w-full bg-transparent outline-none"
+                            />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 border-t border-black">
+                        <div class="border border-black 1 p-1">
+                            ordering call no. / date:
+                        </div>
+                        <div class="border border-black 1 p-1">
+                            <input
+                                type="text"
+                                class="w-full bg-transparent outline-none"
+                            />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 border-t border-black">
+                        <div class="border border-black 1 p-1">
+                            delivery note no./ date:
+                        </div>
+                        <div class="border border-black 1 p-1">
+                            <input
+                                type="text"
+                                class="w-full bg-transparent outline-none"
+                            />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 border-t border-black">
+                        <div class="border border-black 1 p-1">
+                            supplied quantity:
+                        </div>
+                        <div class="border border-black 1 p-1">
+                            <input
+                                type="text"
+                                class="w-full bg-transparent outline-none"
+                            />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 border-t border-black">
+                        <div class="border border-black 1 p-1">
+                            batch number:
+                        </div>
+                        <div class="border border-black 1 p-1">
+                            <input
+                                type="text"
+                                class="w-full bg-transparent outline-none"
+                            />
+                        </div>
+                    </div>
+                    <div
+                        class="grid grid-cols-2 border-t border-b border-black"
+                    >
+                        <div class="border border-black 1 p-1">
+                            weight of samples:
+                        </div>
+                        <div class="border border-black 1 p-1">
+                            <input
+                                type="text"
+                                class="w-full bg-transparent outline-none"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div>
+                    <d iv class="grid grid-cols-2">
+                        <!-- Customer -->
+                        <div
+                            class="border-r border-black font-bold p-1 flex items-center"
+                        >
+                            Customer:
+                        </div>
+
+                        <!-- Customer Number (Label + Input) -->
+                        <div class="p-1 grid grid-cols-2">
+                            <label class="block font-medium pt-2"
+                                >Customer number:</label
+                            >
+                            <input
+                                type="text"
+                                class="w-full border border-gray-300 p-1 mt-1"
+                                placeholder="Enter customer no"
+                            />
+                        </div>
+                    </d>
+                    <div class="grid grid-cols-2 border-t border-black">
+                        <div class="border border-black 1 p-1">
+                            Test report-no.:
+                        </div>
+                        <div class="border border-black 1 p-1">
+                            <input
+                                type="text"
+                                class="w-full bg-transparent outline-none"
+                            />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 border-t border-black">
+                        <div class="border border-black 1 p-1">
+                            part no. / subject no.:
+                        </div>
+                        <div class="border border-black 1 p-1">
+                            <input
+                                type="text"
+                                class="w-full bg-transparent outline-none"
+                            />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 border-t border-black">
+                        <div class="border border-black 1 p-1">
+                            identification:
+                        </div>
+                        <div class="border border-black 1 p-1">
+                            <input
+                                type="text"
+                                class="w-full bg-transparent outline-none"
+                            />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 border-t border-black">
+                        <div class="border border-black 1 p-1">
+                            drawing no.:
+                        </div>
+                        <div class="border border-black 1 p-1">
+                            <input
+                                type="text"
+                                class="w-full bg-transparent outline-none"
+                            />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 border-t border-black">
+                        <div class="border border-black 1 p-1">
+                            level/date/index:
+                        </div>
+                        <div class="border border-black 1 p-1">
+                            <input
+                                type="text"
+                                class="w-full bg-transparent outline-none"
+                            />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 border-t border-black">
+                        <div class="border border-black 1 p-1">
+                            unloading area:
+                        </div>
+                        <div class="border border-black 1 p-1">
+                            <input
+                                type="text"
+                                class="w-full bg-transparent outline-none"
+                            />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 border-t border-black">
+                        <div class="border border-black 1 p-1">
+                            weight of samples:
+                        </div>
+                        <div class="border border-black 1 p-1">
+                            <input
+                                type="text"
+                                class="w-full bg-transparent outline-none"
+                            />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 border-t border-black">
+                        <div class="border border-black 1 p-1">
+                            kind of material:
+                        </div>
+                        <div class="border border-black 1 p-1">
+                            <input
+                                type="text"
+                                class="w-full bg-transparent outline-none"
+                            />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 border-t border-black">
+                        <div class="border border-black 1 p-1">
+                            receipt of goods-no./date:
+                        </div>
+                        <div class="border border-black 1 p-1">
+                            <input
+                                type="text"
+                                class="w-full bg-transparent outline-none"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <form
+                class="grid grid-cols-2 border border-black divide-x divide-black w-full"
             >
-            <label>
-              2) <input type="checkbox" checked /> dimension report</label
-            >
-            <label> 11) <input type="checkbox" /> acoustics</label>
-            <label> 3) <input type="checkbox" checked /> material report</label>
-            <label> 12) <input type="checkbox" /> odour</label>
-            <label> 4) <input type="checkbox" /> reliability test</label>
-            <label
-              >13) <input type="checkbox" /> list used compon./part
-              record</label
-            >
-            <label
-              >5) <input type="checkbox" /> Process capability
-              certificate</label
-            >
-            <label>14) <input type="checkbox" /> certificates</label>
-            <label> 6) <input type="checkbox" /> flow chart</label>
-            <label>15) <input type="checkbox" /> release of construction</label>
-            <label>
-              7) <input type="checkbox" /> testing device capability</label
-            >
-            <label
-              >16) <input type="checkbox" /> materials in bought parts</label
-            >
-            <label> 8) <input type="checkbox" /> measuring methods</label>
-            <label> 17) <input type="checkbox" /> others</label>
-            <label> 9) <input type="checkbox" /> security data sheets</label>
-            <label> 18) <input type="checkbox" /> deviation report</label>
-          </div>
-        </div>
-      </div>
+                <div class="p-2 space-y-2">
+                    <div>
+                        <input type="checkbox" class="mr-2" /> documentation
+                        duty (d-part, DmBA (special archives))
+                    </div>
+                    <div>
+                        <input type="checkbox" class="mr-2" /> FMEA carried out
+                    </div>
 
-      <!-- Header Row -->
-      <div class="grid grid-cols-2 border border-black text-sm"></div>
+                    <div class="font-bold mt-2">
+                        reason of sample inspection:
+                    </div>
+                    <div class="pl-4 space-y-1">
+                        <label
+                            ><input type="checkbox" class="mr-2" checked /> new
+                            parts</label
+                        ><br />
+                        <label
+                            ><input type="checkbox" class="mr-2" /> change of
+                            product</label
+                        ><br />
+                        <label
+                            ><input type="checkbox" class="mr-2" /> transfer of
+                            production</label
+                        ><br />
+                        <label
+                            ><input type="checkbox" class="mr-2" /> changed
+                            production method</label
+                        ><br />
+                        <label
+                            ><input type="checkbox" class="mr-2" /> longer
+                            interruption of production</label
+                        ><br />
+                        <label
+                            ><input type="checkbox" class="mr-2" /> change of
+                            the sub-supplier</label
+                        ><br />
+                        <label
+                            ><input type="checkbox" class="mr-2" /> new tools/
+                            production facilities</label
+                        ><br />
+                        <label
+                            ><input type="checkbox" class="mr-2" /> remedying of
+                            a deviation</label
+                        ><br />
+                        <label
+                            ><input type="checkbox" class="mr-2" /> other
+                            materials</label
+                        >
+                    </div>
 
-      <!-- Form Grid -->
-      <div class="grid grid-cols-2 border-x border-black">
-        <!-- Left Column -->
-        <div>
-          <div class="grid grid-cols-2">
-            <!-- Supplier -->
-            <div class="border-r border-black font-bold p-1 flex items-center">
-              Supplier
-            </div>
+                    <div class="font-bold mt-2">
+                        Presentation step / acceptance step
+                    </div>
+                    <div class="pl-4 space-y-1">
+                        <label
+                            ><input type="checkbox" class="mr-2" /> 1
+                            presentation cover sheet (self certifying
+                            supplier)</label
+                        ><br />
+                        <label
+                            ><input type="checkbox" class="mr-2" /> 2 complete
+                            acceptance at the customer</label
+                        ><br />
+                        <label
+                            ><input type="checkbox" class="mr-2" /> 3 complete
+                            acceptance at the supplier</label
+                        >
+                    </div>
 
-            <!-- Supplier Number (Label + Input) -->
-            <div class="border-r border-black p-1 grid grid-cols-2">
-              <label class="block font-medium pt-2">Supplier number:</label>
-              <input
-                type="text"
-                class="border border-gray-300 p-1 mt-1"
-                placeholder="Enter supplier no"
-              />
-            </div>
-          </div>
-          <div class="grid grid-cols-2 border-t border-black">
-            <div class="border border-black 1 p-1">Test report-no.:</div>
-            <div class="border border-black 1 p-1">
-              <input type="text" class="w-full bg-transparent outline-none" />
-            </div>
-          </div>
-          <div class="grid grid-cols-2 border-t border-black">
-            <div class="border border-black 1 p-1">part no./ subject no.:</div>
-            <div class="border border-black 1 p-1">
-              <input type="text" class="w-full bg-transparent outline-none" />
-            </div>
-          </div>
-          <div class="grid grid-cols-2 border-t border-black">
-            <div class="border border-black 1 p-1">identification:</div>
-            <div class="border border-black 1 p-1">
-              <input type="text" class="w-full bg-transparent outline-none" />
-            </div>
-          </div>
-          <div class="grid grid-cols-2 border-t border-black">
-            <div class="border border-black p-1">drawing no.:</div>
-            <div class="border border-black p-1">
-              <input type="text" class="w-full bg-transparent outline-none" />
-            </div>
-          </div>
-          <div class="grid grid-cols-2 border-t border-black">
-            <div class="border border-black 1 p-1">level/date/index:</div>
-            <div class="border border-black 1 p-1">
-              <input type="text" class="w-full bg-transparent outline-none" />
-            </div>
-          </div>
-          <div class="grid grid-cols-2 border-t border-black">
-            <div class="border border-black 1 p-1">
-              ordering call no. / date:
-            </div>
-            <div class="border border-black 1 p-1">
-              <input type="text" class="w-full bg-transparent outline-none" />
-            </div>
-          </div>
-          <div class="grid grid-cols-2 border-t border-black">
-            <div class="border border-black 1 p-1">
-              delivery note no./ date:
-            </div>
-            <div class="border border-black 1 p-1">
-              <input type="text" class="w-full bg-transparent outline-none" />
-            </div>
-          </div>
-          <div class="grid grid-cols-2 border-t border-black">
-            <div class="border border-black 1 p-1">supplied quantity:</div>
-            <div class="border border-black 1 p-1">
-              <input type="text" class="w-full bg-transparent outline-none" />
-            </div>
-          </div>
-          <div class="grid grid-cols-2 border-t border-black">
-            <div class="border border-black 1 p-1">batch number:</div>
-            <div class="border border-black 1 p-1">
-              <input type="text" class="w-full bg-transparent outline-none" />
-            </div>
-          </div>
-          <div class="grid grid-cols-2 border-t border-b border-black">
-            <div class="border border-black 1 p-1">weight of samples:</div>
-            <div class="border border-black 1 p-1">
-              <input type="text" class="w-full bg-transparent outline-none" />
-            </div>
-          </div>
-        </div>
+                    <div class="mt-3 font-bold">notes:</div>
+                    <textarea
+                        type="text"
+                        class="border border-black w-full h-20 p-1"
+                    >
+                    </textarea>
 
-        <!-- Right Column -->
-        <div>
-          <d iv class="grid grid-cols-2">
-            <!-- Customer -->
-            <div class="border-r border-black font-bold p-1 flex items-center">
-              Customer:
-            </div>
+                    <div class="mt-3 font-bold">Confirmation of supplier:</div>
+                    <p>You hereby confirm that the sampling corresponding to</p>
+                    <div class="pl-4">
+                        <label
+                            ><input type="checkbox" class="mr-2" checked /> VDA
+                            Bd. 2 Ziff. 4</label
+                        ><br />
+                        <label
+                            ><input type="checkbox" class="mr-2" /> QS 9000 PPAP
+                            guideline</label
+                        >
+                    </div>
 
-            <!-- Customer Number (Label + Input) -->
-            <div class="p-1 grid grid-cols-2">
-              <label class="block font-medium pt-2">Customer number:</label>
-              <input
-                type="text"
-                class="w-full border border-gray-300 p-1 mt-1"
-                placeholder="Enter customer no"
-              />
-            </div>
-          </d>
-          <div class="grid grid-cols-2 border-t border-black">
-            <div class="border border-black 1 p-1">Test report-no.:</div>
-            <div class="border border-black 1 p-1">
-              <input type="text" class="w-full bg-transparent outline-none" />
-            </div>
-          </div>
-          <div class="grid grid-cols-2 border-t border-black">
-            <div class="border border-black 1 p-1">part no. / subject no.:</div>
-            <div class="border border-black 1 p-1">
-              <input type="text" class="w-full bg-transparent outline-none" />
-            </div>
-          </div>
-          <div class="grid grid-cols-2 border-t border-black">
-            <div class="border border-black 1 p-1">identification:</div>
-            <div class="border border-black 1 p-1">
-              <input type="text" class="w-full bg-transparent outline-none" />
-            </div>
-          </div>
-          <div class="grid grid-cols-2 border-t border-black">
-            <div class="border border-black 1 p-1">drawing no.:</div>
-            <div class="border border-black 1 p-1">
-              <input type="text" class="w-full bg-transparent outline-none" />
-            </div>
-          </div>
-          <div class="grid grid-cols-2 border-t border-black">
-            <div class="border border-black 1 p-1">level/date/index:</div>
-            <div class="border border-black 1 p-1">
-              <input type="text" class="w-full bg-transparent outline-none" />
-            </div>
-          </div>
-          <div class="grid grid-cols-2 border-t border-black">
-            <div class="border border-black 1 p-1">unloading area:</div>
-            <div class="border border-black 1 p-1">
-              <input type="text" class="w-full bg-transparent outline-none" />
-            </div>
-          </div>
-          <div class="grid grid-cols-2 border-t border-black">
-            <div class="border border-black 1 p-1">weight of samples:</div>
-            <div class="border border-black 1 p-1">
-              <input type="text" class="w-full bg-transparent outline-none" />
-            </div>
-          </div>
-          <div class="grid grid-cols-2 border-t border-black">
-            <div class="border border-black 1 p-1">kind of material:</div>
-            <div class="border border-black 1 p-1">
-              <input type="text" class="w-full bg-transparent outline-none" />
-            </div>
-          </div>
-          <div class="grid grid-cols-2 border-t border-black">
-            <div class="border border-black 1 p-1">
-              receipt of goods-no./date:
-            </div>
-            <div class="border border-black 1 p-1">
-              <input type="text" class="w-full bg-transparent outline-none" />
-            </div>
-          </div>
-        </div>
-      </div>
-      <form
-        class="grid grid-cols-2 border border-black divide-x divide-black w-full"
-      >
-        <div class="p-2 space-y-2">
-          <div>
-            <input type="checkbox" class="mr-2" /> documentation duty (d-part,
-            DmBA (special archives))
-          </div>
-          <div><input type="checkbox" class="mr-2" /> FMEA carried out</div>
+                    <div class="grid grid-cols-2 gap-2 mt-2">
+                        <div class="grid grid-cols-2">
+                            <div class="font-bold grid grid-cols-2">Name:</div>
+                            <input
+                                type="text"
+                                class="border border-black w-[360px] h-6 p-1"
+                            />
+                        </div>
+                        <br />
+                        <div class="grid grid-cols-2">
+                            <div class="font-bold">Department:</div>
+                            <input
+                                type="text"
+                                class="border border-black w-[360px] h-6 p-1"
+                            />
+                        </div>
+                        <br />
+                        <div class="grid grid-cols-2">
+                            <div class="font-bold">Phone/fax/e-mail:</div>
+                            <input
+                                type="text"
+                                class="border border-black w-[360px] h-6 p-1"
+                            />
+                        </div>
+                        <br />
+                        <div class="grid grid-cols-2">
+                            <div class="font-bold">Date:</div>
+                            <input
+                                type="date"
+                                class="border border-black w-[360px] h-6 p-1"
+                            />
+                        </div>
+                        <div class="col-span-2">
+                            <div class="font-bold">Signature:</div>
+                            <textarea
+                                type="text"
+                                class="border border-black w-full h-20 p-1"
+                            >
+                            </textarea>
+                        </div>
+                    </div>
 
-          <div class="font-bold mt-2">reason of sample inspection:</div>
-          <div class="pl-4 space-y-1">
-            <label
-              ><input type="checkbox" class="mr-2" checked /> new parts</label
-            ><br />
-            <label
-              ><input type="checkbox" class="mr-2" /> change of product</label
-            ><br />
-            <label
-              ><input type="checkbox" class="mr-2" /> transfer of
-              production</label
-            ><br />
-            <label
-              ><input type="checkbox" class="mr-2" /> changed production
-              method</label
-            ><br />
-            <label
-              ><input type="checkbox" class="mr-2" /> longer interruption of
-              production</label
-            ><br />
-            <label
-              ><input type="checkbox" class="mr-2" /> change of the
-              sub-supplier</label
-            ><br />
-            <label
-              ><input type="checkbox" class="mr-2" /> new tools/ production
-              facilities</label
-            ><br />
-            <label
-              ><input type="checkbox" class="mr-2" /> remedying of a
-              deviation</label
-            ><br />
-            <label
-              ><input type="checkbox" class="mr-2" /> other materials</label
-            >
-          </div>
+                    <div class="font-bold mt-2">distributor:</div>
+                    <input type="text" class="border border-black w-full p-1" />
+                </div>
 
-          <div class="font-bold mt-2">Presentation step / acceptance step</div>
-          <div class="pl-4 space-y-1">
-            <label
-              ><input type="checkbox" class="mr-2" /> 1 presentation cover sheet
-              (self certifying supplier)</label
-            ><br />
-            <label
-              ><input type="checkbox" class="mr-2" /> 2 complete acceptance at
-              the customer</label
-            ><br />
-            <label
-              ><input type="checkbox" class="mr-2" /> 3 complete acceptance at
-              the supplier</label
-            >
-          </div>
+                <!-- RIGHT SIDE -->
+                <div class="p-2">
+                    <div class="overflow-x-auto">
+                        <table
+                            class="table-fixed border border-black w-full text-sm"
+                        >
+                            <thead>
+                                <tr>
+                                    <th
+                                        class="border border-black px-2 py-1 text-left font-bold w-1/3 align-top"
+                                    >
+                                        Decision of customer:
+                                    </th>
+                                    <th
+                                        class="border border-black px-2 py-1 font-bold text-center w-1/6 align-top"
+                                    >
+                                        released
+                                    </th>
+                                    <th
+                                        class="border border-black px-2 py-1 font-bold text-center align-top"
+                                    >
+                                        free under conditions
+                                    </th>
+                                    <th
+                                        class="border border-black px-2 py-1 font-bold text-center w-1/6 align-top"
+                                    >
+                                        refused
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="border border-black px-2 py-1">
+                                        1) function report
+                                    </td>
+                                    <td class="border border-black text-center">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black text-center">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black text-center">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                </tr>
 
-          <div class="mt-3 font-bold">notes:</div>
-          <textarea type="text" class="border border-black w-full h-20 p-1">
-          </textarea>
+                                <tr>
+                                    <td class="border border-black px-2 py-1">
+                                        2) dimension report
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black px-2 py-1">
+                                        3) material report
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black px-2 py-1">
+                                        4) reliability test
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black px-2 py-1">
+                                        5) process capability
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black px-2 py-1">
+                                        6) process capability
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black px-2 py-1">
+                                        7) process capability
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black px-2 py-1">
+                                        8) process capability
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black px-2 py-1">
+                                        9) process capability
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black px-2 py-1">
+                                        10) process capability
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black px-2 py-1">
+                                        11) process capability
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black px-2 py-1">
+                                        12) process capability
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black px-2 py-1">
+                                        13) process capability
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black px-2 py-1">
+                                        14) process capability
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black px-2 py-1">
+                                        15) process capability
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                </tr>
 
-          <div class="mt-3 font-bold">Confirmation of supplier:</div>
-          <p>You hereby confirm that the sampling corresponding to</p>
-          <div class="pl-4">
-            <label
-              ><input type="checkbox" class="mr-2" checked /> VDA Bd. 2 Ziff.
-              4</label
-            ><br />
-            <label
-              ><input type="checkbox" class="mr-2" /> QS 9000 PPAP
-              guideline</label
-            >
-          </div>
+                                <tr>
+                                    <td class="border border-black px-2 py-1">
+                                        16) flow chart
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                </tr>
+                                <!-- Add the rest till 18 -->
+                                <tr>
+                                    <td
+                                        class="border border-black px-2 py-1 text-xs"
+                                    >
+                                        17)
+                                        <span class="italic"
+                                            >list used compon. / part
+                                            record</span
+                                        >
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none text-xs"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none text-xs"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none text-xs"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-black px-2 py-1">
+                                        18) deviation report
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                </tr>
 
-          <div class="grid grid-cols-2 gap-2 mt-2">
-            <div class="grid grid-cols-2">
-              <div class="font-bold grid grid-cols-2">Name:</div>
-              <input
-                type="text"
-                class="border border-black w-[360px] h-6 p-1"
-              />
-            </div>
-            <br />
-            <div class="grid grid-cols-2">
-              <div class="font-bold">Department:</div>
-              <input
-                type="text"
-                class="border border-black w-[360px] h-6 p-1"
-              />
-            </div>
-            <br />
-            <div class="grid grid-cols-2">
-              <div class="font-bold">Phone/fax/e-mail:</div>
-              <input
-                type="text"
-                class="border border-black w-[360px] h-6 p-1"
-              />
-            </div>
-            <br />
-            <div class="grid grid-cols-2">
-              <div class="font-bold">Date:</div>
-              <input
-                type="date"
-                class="border border-black w-[360px] h-6 p-1"
-              />
-            </div>
-            <div class="col-span-2">
-              <div class="font-bold">Signature:</div>
-              <textarea type="text" class="border border-black w-full h-20 p-1">
-              </textarea>
-            </div>
-          </div>
-
-          <div class="font-bold mt-2">distributor:</div>
-          <input type="text" class="border border-black w-full p-1" />
-        </div>
-
-        <!-- RIGHT SIDE -->
-        <div class="p-2">
-          <div class="overflow-x-auto">
-            <table class="table-fixed border border-black w-full text-sm">
-              <thead>
-                <tr>
-                  <th
-                    class="border border-black px-2 py-1 text-left font-bold w-1/3 align-top"
-                  >
-                    Decision of customer:
-                  </th>
-                  <th
-                    class="border border-black px-2 py-1 font-bold text-center w-1/6 align-top"
-                  >
-                    released
-                  </th>
-                  <th
-                    class="border border-black px-2 py-1 font-bold text-center align-top"
-                  >
-                    free under conditions
-                  </th>
-                  <th
-                    class="border border-black px-2 py-1 font-bold text-center w-1/6 align-top"
-                  >
-                    refused
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="border border-black px-2 py-1">
-                    1) function report
-                  </td>
-                  <td class="border border-black text-center">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black text-center">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black text-center">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                </tr>
-
-                <tr>
-                  <td class="border border-black px-2 py-1">
-                    2) dimension report
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="border border-black px-2 py-1">
-                    3) material report
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="border border-black px-2 py-1">
-                    4) reliability test
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="border border-black px-2 py-1">
-                    5) process capability
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="border border-black px-2 py-1">
-                    6) process capability
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="border border-black px-2 py-1">
-                    7) process capability
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="border border-black px-2 py-1">
-                    8) process capability
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="border border-black px-2 py-1">
-                    9) process capability
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="border border-black px-2 py-1">
-                    10) process capability
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="border border-black px-2 py-1">
-                    11) process capability
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="border border-black px-2 py-1">
-                    12) process capability
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="border border-black px-2 py-1">
-                    13) process capability
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="border border-black px-2 py-1">
-                    14) process capability
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="border border-black px-2 py-1">
-                    15) process capability
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                </tr>
-
-                <tr>
-                  <td class="border border-black px-2 py-1">16) flow chart</td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                </tr>
-                <!-- Add the rest till 18 -->
-                <tr>
-                  <td class="border border-black px-2 py-1 text-xs">
-                    17)
-                    <span class="italic">list used compon. / part record</span>
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none text-xs"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none text-xs"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none text-xs"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td class="border border-black px-2 py-1">
-                    18) deviation report
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                </tr>
-
-                <tr>
-                  <td class="border border-black px-2 py-1">
-                    <b>complete decision</b>
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                  <td class="border border-black">
-                    <input
-                      type="text"
-                      class="w-full px-1 py-0.5 outline-none"
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="grid grid-cols-2 mt-2">
-            <div class="mt-1">deviation approval no.:</div>
-            <input type="text" class="border border-black w-[240px] h-6 p-1" />
-          </div>
-          <div class="grid grid-cols-2 mt-2">
-            <div class="mt-1">If return shipment: delivery note no./date:</div>
-            <input type="text" class="border border-black w-[240px] h-6 p-1" />
-          </div>
-          <textarea
-            class="border border-black w-full h-20 p-1 text-xs leading-tight resize-none"
-          >
+                                <tr>
+                                    <td class="border border-black px-2 py-1">
+                                        <b>complete decision</b>
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                    <td class="border border-black">
+                                        <input
+                                            type="text"
+                                            class="w-full px-1 py-0.5 outline-none"
+                                        />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="grid grid-cols-2 mt-2">
+                        <div class="mt-1">deviation approval no.:</div>
+                        <input
+                            type="text"
+                            class="border border-black w-[240px] h-6 p-1"
+                        />
+                    </div>
+                    <div class="grid grid-cols-2 mt-2">
+                        <div class="mt-1">
+                            If return shipment: delivery note no./date:
+                        </div>
+                        <input
+                            type="text"
+                            class="border border-black w-[240px] h-6 p-1"
+                        />
+                    </div>
+                    <textarea
+                        class="border border-black w-full h-20 p-1 text-xs leading-tight resize-none"
+                    >
           Process, machine, production site, material, supplier,
           measuring devices are not allowed to be modified after
           release of this PPAP. All conditions must be fulfilled before a ...
             </textarea
-          >
+                    >
 
-          <div class="mt-1 font-bold">notes:</div>
-          <textarea type="text" class="border border-black w-full h-20 p-1">
-          </textarea>
+                    <div class="mt-1 font-bold">notes:</div>
+                    <textarea
+                        type="text"
+                        class="border border-black w-full h-20 p-1"
+                    >
+                    </textarea>
 
-          <div class="grid grid-cols-2 gap-2 mt-2">
-            <div class="grid grid-cols-2">
-              <div class="font-bold">Name:</div>
-              <input
-                type="text"
-                class="border border-black w-[360px] h-6 p-1"
-              />
-            </div>
-            <br />
-            <div class="grid grid-cols-2">
-              <div class="font-bold">Department:</div>
-              <input
-                type="text"
-                class="border border-black w-[360px] h-6 p-1"
-              />
-            </div>
-            <br />
-            <div class="grid grid-cols-2">
-              <div class="font-bold">Phone/fax/e-mail:</div>
-              <input
-                type="text"
-                class="border border-black w-[360px] h-6 p-1"
-              />
-            </div>
-            <br />
-            <div class="grid grid-cols-2">
-              <div class="font-bold">Date:</div>
-              <input
-                type="date"
-                class="border border-black w-[360px] h-6 p-1"
-              />
-            </div>
-            <div class="col-span-2">
-              <div class="font-bold">Signature:</div>
-              <textarea type="text" class="border border-black w-full h-20 p-1">
-              </textarea>
-            </div>
-          </div>
+                    <div class="grid grid-cols-2 gap-2 mt-2">
+                        <div class="grid grid-cols-2">
+                            <div class="font-bold">Name:</div>
+                            <input
+                                type="text"
+                                class="border border-black w-[360px] h-6 p-1"
+                            />
+                        </div>
+                        <br />
+                        <div class="grid grid-cols-2">
+                            <div class="font-bold">Department:</div>
+                            <input
+                                type="text"
+                                class="border border-black w-[360px] h-6 p-1"
+                            />
+                        </div>
+                        <br />
+                        <div class="grid grid-cols-2">
+                            <div class="font-bold">Phone/fax/e-mail:</div>
+                            <input
+                                type="text"
+                                class="border border-black w-[360px] h-6 p-1"
+                            />
+                        </div>
+                        <br />
+                        <div class="grid grid-cols-2">
+                            <div class="font-bold">Date:</div>
+                            <input
+                                type="date"
+                                class="border border-black w-[360px] h-6 p-1"
+                            />
+                        </div>
+                        <div class="col-span-2">
+                            <div class="font-bold">Signature:</div>
+                            <textarea
+                                type="text"
+                                class="border border-black w-full h-20 p-1"
+                            >
+                            </textarea>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
-      </form>
-    </div>
-  </body>
+    </body>
 </html>

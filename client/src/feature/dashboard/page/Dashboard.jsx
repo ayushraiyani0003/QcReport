@@ -68,7 +68,7 @@ export default function EnhancedDashboard() {
         <div className="flex items-center justify-between mb-3">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
-              Unified Report Dashboard
+              QC Report Dashboard
             </h1>
             <p className="text-gray-600 mt-1">
               Manage FI and IS reports in one centralized location

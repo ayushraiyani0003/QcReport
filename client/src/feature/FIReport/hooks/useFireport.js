@@ -171,39 +171,36 @@ export const useFIReport = () => {
     }
   };
 
-  const getInputValue = (id) => {
-    const el = document.getElementById(id);
-    const value = el ? el.value.trim() : "";
-    return value || null;
-  };
-
-  const getCheckboxValue = (id) => {
-    const el = document.getElementById(id);
-    return el ? el.checked : false;
-  };
+  // Updated helper functions to properly handle null values
 
   const getCleanInputValue = (id) => {
     const el = document.getElementById(id);
-    if (!el) return null;
-    const value = el.value.trim();
-    return value === "" ? null : value;
+    if (!el) return undefined;
+    return el.value.trim();
   };
 
   const getCleanNumberValue = (id) => {
     const value = getCleanInputValue(id);
-    if (!value) return null;
+    if (value === undefined) return undefined; // Element not found
+    if (value === null) return null; // Empty field becomes null
     const parsed = Number.parseInt(value);
     return isNaN(parsed) ? null : parsed;
   };
 
   const getCleanDateValue = (id) => {
     const value = getCleanInputValue(id);
-    if (!value) return null;
+    if (value === undefined) return undefined; // Element not found
+    if (value === null) return null; // Empty field becomes null
     const date = new Date(value);
     return isNaN(date.getTime()) ? null : date;
   };
 
-  // ------------------------- POPULATE FORM -------------------------
+  // For checkboxes, use undefined when unchecked to exclude from update
+  const getCheckboxValue = (id) => {
+    const el = document.getElementById(id);
+    if (!el) return undefined;
+    return el.checked ? true : undefined; // Only send true values, exclude false
+  }; // ------------------------- POPULATE FORM -------------------------
   const populateFormData = (report) => {
     console.log("Report data:", report);
 
@@ -259,14 +256,14 @@ export const useFIReport = () => {
       // });
 
       // Helper function to get the best value from multiple sources
-      const getBestValue = (...sources) => {
-        for (const source of sources) {
-          if (source !== null && source !== undefined && source !== "") {
-            return source;
-          }
-        }
-        return "";
-      };
+      // const getBestValue = (...sources) => {
+      //   for (const source of sources) {
+      //     if (source !== null && source !== undefined && source !== "") {
+      //       return source;
+      //     }
+      //   }
+      //   return "";
+      // };
 
       // Populate basic form fields from base report data
       setInputValue("supplier-number", report.supplierNumber);
@@ -279,7 +276,7 @@ export const useFIReport = () => {
             .toISOString()
             .split("T")[0];
           setInputValue("supplier-date", formattedDate);
-        } catch (error) {
+        } catch {
           console.warn("Invalid date value:", report.date);
           setInputValue("supplier-date", report.date);
         }
@@ -326,7 +323,7 @@ export const useFIReport = () => {
 
       // console.log("Form population completed successfully");
     } catch (error) {
-      // console.error(" Error in populateFormData:", error);
+      console.error(" Error in populateFormData:", error);
     }
   };
 
@@ -362,7 +359,7 @@ export const useFIReport = () => {
       const customerRow = customerMeasurements[i] || {};
 
       const row = {
-        // From blankReportData: Details, Drawing Value, Test Method, Actual Value, Actual Tolerance (+), Actual Tolerance (−)
+        // From blankReportData: Details, Drawing Value, Test Method, Actual Value, Actual Tolerances (+), Actual Tolerances (−)
         details: blankRow.details || "",
         drawing: blankRow.drawing || "",
         method: blankRow.method || "",
@@ -430,7 +427,7 @@ export const useFIReport = () => {
     const totalCols = fieldOrder.length;
     const colIndex = fieldOrder.indexOf(fieldName);
 
-    if (e.key === "ArrowRight") {
+    if (e.shiftKey && e.key === "ArrowRight") {
       e.preventDefault();
       const nextCol = (colIndex + 1) % totalCols;
       document
@@ -438,14 +435,13 @@ export const useFIReport = () => {
         ?.focus();
     }
 
-    if (e.key === "ArrowLeft") {
+    if (e.shiftKey && e.key === "ArrowLeft") {
       e.preventDefault();
       const prevCol = (colIndex - 1 + totalCols) % totalCols;
       document
         .querySelector(`#cell-${rowIndex}-${fieldOrder[prevCol]}`)
         ?.focus();
     }
-
     if (e.key === "ArrowDown" || e.key === "Enter") {
       e.preventDefault();
       const nextRow = rowIndex + 1;
@@ -475,54 +471,73 @@ export const useFIReport = () => {
 
   // ------------------------- UTILITY FUNCTIONS FOR CLEAN DATA -------------------------
 
+  // Updated removeEmptyValues function - preserves null but removes undefined
+  // Updated removeEmptyValues function that preserves null in arrays
   const removeEmptyValues = (obj) => {
     const cleaned = {};
 
     for (const [key, value] of Object.entries(obj)) {
-      if (value !== null && value !== undefined && value !== "") {
-        if (Array.isArray(value)) {
-          const cleanedArray = value.filter((item) => {
-            if (typeof item === "object" && item !== null) {
-              const cleanedItem = removeEmptyValues(item);
-              return Object.keys(cleanedItem).length > 0;
-            }
-            return item !== null && item !== undefined && item !== "";
-          });
-          if (cleanedArray.length > 0) {
-            cleaned[key] = cleanedArray;
+      // Skip undefined values (don't include in cleaned object)
+      if (value === undefined) {
+        continue;
+      }
+
+      // Preserve null values (include them in cleaned object)
+      if (value === null) {
+        cleaned[key] = null;
+        continue;
+      }
+
+      // Handle empty strings - convert to null for database
+      if (value === "") {
+        cleaned[key] = null;
+        continue;
+      }
+
+      if (Array.isArray(value)) {
+        // For arrays, preserve structure and null values
+        const cleanedArray = value.map((item) => {
+          if (item === undefined) {
+            return null; // Convert undefined to null in arrays
           }
-        } else if (typeof value === "object" && value !== null) {
-          const cleanedObj = removeEmptyValues(value);
-          if (Object.keys(cleanedObj).length > 0) {
-            cleaned[key] = cleanedObj;
+          if (item === null) {
+            return null; // Keep null as null
           }
-        } else {
-          cleaned[key] = value;
-        }
+          if (item === "") {
+            return null; // Convert empty string to null
+          }
+          if (typeof item === "object" && item !== null) {
+            return removeEmptyValues(item);
+          }
+          return item;
+        });
+
+        // Always include the array, even if it contains nulls
+        // This preserves array structure for measurements
+        cleaned[key] = cleanedArray;
+      } else if (typeof value === "object" && value !== null) {
+        const cleanedObj = removeEmptyValues(value);
+        // Always include objects, even if they only contain nulls
+        cleaned[key] = cleanedObj;
+      } else {
+        cleaned[key] = value;
       }
     }
 
     return cleaned;
-  };
-
-  // Extract measurements for each dataset - ONLY the required fields
+  }; // Extract measurements for each dataset - ONLY the required fields
+  // Fixed extractMeasurements function that preserves null values
   const extractMeasurements = (rows) => {
-    // Check if there are any rows with data
-    const hasData = rows.some((row) => {
-      return (
-        row.details?.trim() ||
-        row.drawing?.trim() ||
-        row.method?.trim() ||
-        row.actualValue?.trim() ||
-        row.tolerancePlus?.trim() ||
-        row.toleranceMinus?.trim() ||
-        Object.keys(row).some(
-          (key) => key.startsWith("value") && row[key]?.trim()
-        )
-      );
+    // Always process all rows, even if they contain null values
+    const hasAnyData = rows.some((row) => {
+      return Object.keys(row).some((key) => {
+        const value = row[key];
+        // Consider null as valid data (explicit clearing)
+        return value !== undefined && value !== "";
+      });
     });
 
-    if (!hasData) {
+    if (!hasAnyData) {
       return {
         blankMeasurements: [],
         supplierMeasurements: [],
@@ -530,60 +545,92 @@ export const useFIReport = () => {
       };
     }
 
-    // Process each row and extract only the required fields for each dataset
     const blankMeasurements = [];
     const supplierMeasurements = [];
     const customerMeasurements = [];
 
-    rows.forEach((row) => {
-      // Extract ONLY the required fields for blankReportData
-      const blankMeasurement = {};
-      if (row.details?.trim()) blankMeasurement.details = row.details.trim();
-      if (row.drawing?.trim()) blankMeasurement.drawing = row.drawing.trim();
-      if (row.method?.trim()) blankMeasurement.method = row.method.trim();
-      if (row.actualValue?.trim())
-        blankMeasurement.actualValue = row.actualValue.trim();
-      if (row.tolerancePlus?.trim())
-        blankMeasurement.tolerancePlus = row.tolerancePlus.trim();
-      if (row.toleranceMinus?.trim())
-        blankMeasurement.toleranceMinus = row.toleranceMinus.trim();
+    rows.forEach((row, index) => {
+      // Helper function to clean individual field values
+      const cleanFieldValue = (value) => {
+        if (value === undefined) return undefined; // Don't include
+        if (value === "") return null; // Empty string becomes null
+        return value; // Keep everything else including null
+      };
 
-      // Only add if there's at least one field with data
-      if (Object.keys(blankMeasurement).length > 0) {
+      // Extract blank measurement fields - preserve null values
+      const blankMeasurement = {};
+      let hasBlankData = false;
+
+      [
+        "details",
+        "drawing",
+        "method",
+        "actualValue",
+        "tolerancePlus",
+        "toleranceMinus",
+      ].forEach((field) => {
+        const cleanValue = cleanFieldValue(row[field]);
+        if (cleanValue !== undefined) {
+          blankMeasurement[field] = cleanValue;
+          hasBlankData = true;
+        }
+      });
+
+      // Always include the measurement object if we're in edit mode or have any data
+      if (hasBlankData || index < rows.length) {
         blankMeasurements.push(blankMeasurement);
       }
 
-      // Extract ONLY P1-P5 for supplierFiledData
+      // Extract supplier measurement fields (P1-P5) - preserve null values
       const supplierMeasurement = {};
-      if (row.value0?.trim()) supplierMeasurement.P1 = row.value0.trim();
-      if (row.value1?.trim()) supplierMeasurement.P2 = row.value1.trim();
-      if (row.value2?.trim()) supplierMeasurement.P3 = row.value2.trim();
-      if (row.value3?.trim()) supplierMeasurement.P4 = row.value3.trim();
-      if (row.value4?.trim()) supplierMeasurement.P5 = row.value4.trim();
+      let hasSupplierData = false;
 
-      // Only add if there's at least one field with data
-      if (Object.keys(supplierMeasurement).length > 0) {
+      ["value0", "value1", "value2", "value3", "value4"].forEach(
+        (field, idx) => {
+          const cleanValue = cleanFieldValue(row[field]);
+          if (cleanValue !== undefined) {
+            supplierMeasurement[`P${idx + 1}`] = cleanValue;
+            hasSupplierData = true;
+          }
+        }
+      );
+
+      if (hasSupplierData || index < rows.length) {
         supplierMeasurements.push(supplierMeasurement);
       }
 
-      // Extract ONLY C1-C5 for customerFiledData
+      // Extract customer measurement fields (C1-C5) - preserve null values
       const customerMeasurement = {};
-      if (row.value5?.trim()) customerMeasurement.C1 = row.value5.trim();
-      if (row.value6?.trim()) customerMeasurement.C2 = row.value6.trim();
-      if (row.value7?.trim()) customerMeasurement.C3 = row.value7.trim();
-      if (row.value8?.trim()) customerMeasurement.C4 = row.value8.trim();
-      if (row.value9?.trim()) customerMeasurement.C5 = row.value9.trim();
+      let hasCustomerData = false;
 
-      // Only add if there's at least one field with data
-      if (Object.keys(customerMeasurement).length > 0) {
+      ["value5", "value6", "value7", "value8", "value9"].forEach(
+        (field, idx) => {
+          const cleanValue = cleanFieldValue(row[field]);
+          if (cleanValue !== undefined) {
+            customerMeasurement[`C${idx + 1}`] = cleanValue;
+            hasCustomerData = true;
+          }
+        }
+      );
+
+      if (hasCustomerData || index < rows.length) {
         customerMeasurements.push(customerMeasurement);
       }
     });
 
-    // console.log("EXTRACTED MEASUREMENTS:");
-    // console.log("Blank measurements:", blankMeasurements);
-    // console.log("Supplier measurements:", supplierMeasurements);
-    // console.log("Customer measurements:", customerMeasurements);
+    console.log("EXTRACTED MEASUREMENTS (with null preservation):");
+    console.log(
+      "Blank measurements:",
+      JSON.stringify(blankMeasurements, null, 2)
+    );
+    console.log(
+      "Supplier measurements:",
+      JSON.stringify(supplierMeasurements, null, 2)
+    );
+    console.log(
+      "Customer measurements:",
+      JSON.stringify(customerMeasurements, null, 2)
+    );
 
     return {
       blankMeasurements,
@@ -591,7 +638,7 @@ export const useFIReport = () => {
       customerMeasurements,
     };
   };
-
+  // ------------------------- SAVE FUNCTIONALITY -------------------------
   // ------------------------- SAVE FUNCTIONALITY -------------------------
   const handleSave = async () => {
     try {
@@ -603,9 +650,7 @@ export const useFIReport = () => {
 
       const baseData = {
         reportName: autoGeneratedReportName,
-        clientName:
-          getCleanInputValue("customer-name") ||
-          getCleanInputValue("supplier-name"),
+        clientName: getCleanInputValue("customer-name"),
         supplierNumber: getCleanNumberValue("supplier-number"),
         supplierName: getCleanInputValue("supplier-name"),
         date: getCleanDateValue("supplier-date"),
@@ -630,72 +675,40 @@ export const useFIReport = () => {
         remarks: getCleanInputValue("remarks-supplier"),
       };
 
-      // Create datasets with ONLY the required fields - NO OTHER DATA
-      const blankReportData =
-        blankMeasurements.length > 0
-          ? {
-              measurements: blankMeasurements,
-            }
-          : {};
+      // helper to check if all objects in array are fully null
+      const isAllNull = (arr) =>
+        !arr || arr.length === 0
+          ? true
+          : arr.every((obj) => {
+              if (!obj || Object.keys(obj).length === 0) return true; // empty object
+              return Object.values(obj).every(
+                (val) => val === null || val === undefined
+              );
+            });
+      const blankReportData = isAllNull(blankMeasurements)
+        ? null
+        : { measurements: blankMeasurements };
 
-      const supplierFiledData =
-        supplierMeasurements.length > 0
-          ? {
-              measurements: supplierMeasurements,
-            }
-          : {};
+      const supplierFiledData = isAllNull(supplierMeasurements)
+        ? null
+        : { measurements: supplierMeasurements };
 
-      const customerFiledData =
-        customerMeasurements.length > 0
-          ? {
-              measurements: customerMeasurements,
-            }
-          : {};
+      const customerFiledData = isAllNull(customerMeasurements)
+        ? null
+        : { measurements: customerMeasurements };
 
-      // Clean the data to remove any undefined/null values
-      const cleanBlankData = removeEmptyValues(blankReportData);
-      const cleanSupplierData = removeEmptyValues(supplierFiledData);
-      const cleanCustomerData = removeEmptyValues(customerFiledData);
-
-      const finalReportData = removeEmptyValues({
+      const finalReportData = {
         ...baseData,
-        // Only add these fields if they contain data
-        ...(Object.keys(cleanBlankData).length > 0 && {
-          blankReportData: cleanBlankData,
+        ...(blankReportData !== null && {
+          blankReportData: removeEmptyValues(blankReportData),
         }),
-        ...(Object.keys(cleanSupplierData).length > 0 && {
-          supplierFiledData: cleanSupplierData,
+        ...(supplierFiledData !== null && {
+          supplierFiledData: removeEmptyValues(supplierFiledData),
         }),
-        ...(Object.keys(cleanCustomerData).length > 0 && {
-          customerFiledData: cleanCustomerData,
+        ...(customerFiledData !== null && {
+          customerFiledData: removeEmptyValues(customerFiledData),
         }),
-      });
-
-      // console.log("FINAL DATA TO SAVE:");
-      // console.log(" Base Report Data:", JSON.stringify(baseData, null, 2));
-      // console.log(
-      //   "Blank Report Data:",
-      //   JSON.stringify(cleanBlankData, null, 2)
-      // );
-      // console.log(
-      //   " Supplier Filed Data:",
-      //   JSON.stringify(cleanSupplierData, null, 2)
-      // );
-      // console.log(
-      //   "Customer Filed Data:",
-      //   JSON.stringify(cleanCustomerData, null, 2)
-      // );
-      // console.log(
-      //   "Complete Final Report:",
-      //   JSON.stringify(finalReportData, null, 2)
-      // );
-
-      // console.log("Measurement Counts:", {
-      //   "Blank (Details, Drawing, Method, Actual Value, Tolerances)":
-      //     blankMeasurements.length,
-      //   "Supplier (P1-P5)": supplierMeasurements.length,
-      //   "Customer (C1-C5)": customerMeasurements.length,
-      // });
+      };
 
       if (isEditMode) {
         await dispatch(
@@ -707,9 +720,101 @@ export const useFIReport = () => {
         alert(`Report saved successfully! Name: ${autoGeneratedReportName}`);
       }
     } catch (error) {
-      // console.error("Error saving report:", error);
+      console.error("Error saving report:", error);
       alert(`Error ${isEditMode ? "updating" : "saving"} report.`);
     }
+  };
+  // ------------------------- CLEAR FUNCTIONALITY -------------------------
+  const clearCharacteristicsOnly = () => {
+    setRows((prevRows) =>
+      prevRows.map((row) => ({
+        ...row,
+        details: "",
+        drawing: "",
+        method: "",
+        actualValue: "",
+        tolerancePlus: "",
+        toleranceMinus: "",
+        // Clear P1-P5 (value0-value4) and 1-5 (value5-value9)
+        value0: "",
+        value1: "",
+        value2: "",
+        value3: "",
+        value4: "",
+        value5: "",
+        value6: "",
+        value7: "",
+        value8: "",
+        value9: "",
+        // Reset manual edit flags
+        actualValueManuallyEdited: false,
+        tolerancePlusManuallyEdited: false,
+        toleranceMinusManuallyEdited: false,
+      }))
+    );
+  };
+
+  const clearActualMeasurementsOnly = () => {
+    setRows((prevRows) =>
+      prevRows.map((row) => ({
+        ...row,
+        value0: null,
+        value1: null,
+        value2: null,
+        value3: null,
+        value4: null,
+        value5: null,
+        value6: null,
+        value7: null,
+        value8: null,
+        value9: null,
+      }))
+    );
+  };
+
+  const clearAllData = () => {
+    // Reset all form fields to blank
+    setInputValue("supplier-number", "");
+    setInputValue("supplier-name", "");
+    setInputValue("supplier-date", "");
+    setInputValue("supplier-test-report-no", "");
+    setInputValue("supplier-part-subject-no", "");
+    setInputValue("supplier-identification", "");
+    setInputValue("supplier-drawing-no", "");
+    setInputValue("supplier-level-date-index", "");
+    setInputValue("customer-name", "");
+    setInputValue("customer-test-report-no", "");
+    setInputValue("customer-part-subject-no", "");
+    setInputValue("customer-identification", "");
+    setInputValue("customer-drawing-no", "");
+    setInputValue("customer-level-date-index", "");
+    setInputValue("remarks-supplier", "");
+
+    // Reset all checkboxes
+    setCheckboxValue("final-inspection-vda", false);
+    setCheckboxValue("dimension-report", false);
+    setCheckboxValue("material-report", false);
+    setCheckboxValue("haptics-visual", false);
+    setCheckboxValue("materials-bought-parts", false);
+
+    // Reset rows to single blank row
+    setRows([
+      {
+        details: "",
+        drawing: "",
+        method: "",
+        actualValue: "",
+        tolerancePlus: "",
+        toleranceMinus: "",
+        actualValueManuallyEdited: false,
+        tolerancePlusManuallyEdited: false,
+        toleranceMinusManuallyEdited: false,
+        ...Array.from({ length: 10 }).reduce((acc, _, i) => {
+          acc[`value${i}`] = "";
+          return acc;
+        }, {}),
+      },
+    ]);
   };
 
   // ------------------------- OTHER HANDLERS -------------------------
@@ -719,7 +824,7 @@ export const useFIReport = () => {
         "Are you sure you want to cancel? Any unsaved changes will be lost."
       )
     ) {
-      // navigate("/dashboard");
+      navigate("/dashboard");
     }
   };
 
@@ -741,5 +846,8 @@ export const useFIReport = () => {
     isEditMode,
     generateReportName,
     dataLoaded,
+    clearCharacteristicsOnly,
+    clearActualMeasurementsOnly,
+    clearAllData,
   };
 };

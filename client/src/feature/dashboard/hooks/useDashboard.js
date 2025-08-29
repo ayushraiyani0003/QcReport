@@ -4,11 +4,13 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAllReports as fetchFIReports,
   deleteReport as deleteFIReport,
+  createReport as createFIReport,
   clearError as clearFIError,
 } from "../../../store/FIReportSlice";
 import {
   fetchAllReports as fetchISReports,
   deleteReport as deleteISReport,
+  createReport as createISReport,
   clearError as clearISError,
 } from "../../../store/ISReportSlice";
 
@@ -62,10 +64,7 @@ export const useEnhancedDashboard = () => {
       report.drawingNo || getDrawingNumberFromReport(report, "FI")
     );
 
-    const hasBasicFields = !!(
-      hasDrawingNo &&
-      (report.clientName || report.supplierName)
-    );
+    const hasBasicFields = !!(hasDrawingNo && report.clientName);
 
     // Check if measurement rows have data
     let hasValidRows = false;
@@ -97,10 +96,6 @@ export const useEnhancedDashboard = () => {
         hasValidRows = allFilled;
       }
     }
-
-    // console.log("Has valid measurements rows:", hasValidRows);
-    // console.log(hasBasicFields);
-    // console.log(hasValidRows);
 
     return hasBasicFields && hasValidRows;
   };
@@ -259,8 +254,8 @@ export const useEnhancedDashboard = () => {
 
           // Client information
           clientName =
+            report.clientName || // ✅ testRepNo (DB માંથી આવેલું)
             report.supplierName ||
-            report.clientName ||
             report.client?.name ||
             "Unknown Supplier";
 
@@ -493,17 +488,249 @@ export const useEnhancedDashboard = () => {
     }
   };
 
-  const handleCopyItem = (item) => {
-    const copiedItem = {
-      ...item,
-      id: `${item.id}-copy-${Date.now()}`,
-      name: `${item.name} (Copy)`,
-      isComplete: item.isComplete,
-    };
-    console.log("Copying item:", copiedItem);
-    alert(`${item.reportType} copied`);
-  };
+  // Enhanced Copy Item function
+  // Enhanced handleCopyItem function that preserves ALL report data
+  const handleCopyItem = async (item, copyType = "filled") => {
+    try {
+      console.log(`Creating ${copyType} copy of ${item.reportType}:`, item);
 
+      const originalData = item.originalData;
+
+      // Helper function to deep-clone and preserve ALL filled data
+      // FIXED: returns object instead of string
+      const preserveAllFilledData = (data) => {
+        if (!data) return null;
+        try {
+          const parsed =
+            typeof data === "string"
+              ? JSON.parse(data)
+              : JSON.parse(JSON.stringify(data));
+          return parsed; // ✅ return as object, not string
+        } catch (error) {
+          console.error("Error preserving filled data:", error);
+          return data;
+        }
+      };
+
+      // Helper function to create blank structure while preserving form layout
+      const createBlankStructure = (data, reportType) => {
+        if (!data) return null;
+        try {
+          let structure =
+            typeof data === "string"
+              ? JSON.parse(data)
+              : JSON.parse(JSON.stringify(data));
+
+          // For FI Reports - clear measurement values but keep structure
+          if (reportType === "FI" && structure.measurements) {
+            structure.measurements = structure.measurements.map((row) => ({
+              ...row,
+              P1: "",
+              P2: "",
+              P3: "",
+              P4: "",
+              P5: "",
+              actualValue: "",
+              actualTolerancePlus: "",
+              actualToleranceMinus: "",
+            }));
+          }
+
+          // Clear supplier info but keep structure
+          if (structure.supplierInfo) {
+            Object.keys(structure.supplierInfo).forEach((key) => {
+              if (!["supplierName", "supplierNumber"].includes(key)) {
+                structure.supplierInfo[key] = "";
+              }
+            });
+          }
+
+          // Clear customer info but keep structure
+          if (structure.customerInfo) {
+            Object.keys(structure.customerInfo).forEach((key) => {
+              structure.customerInfo[key] = "";
+            });
+          }
+
+          // Clear signatures and dates
+          if (structure.signatures) {
+            structure.signatures = {
+              supplier: "",
+              customer: "",
+              date: "",
+            };
+          }
+
+          return JSON.stringify(structure);
+        } catch (error) {
+          console.error("Error creating blank structure:", error);
+          return null;
+        }
+      };
+
+      // Create comprehensive base data that includes ALL original fields
+      const baseReportData = {};
+
+      Object.keys(originalData).forEach((key) => {
+        if (!["id", "_id", "createdAt", "updatedAt"].includes(key)) {
+          baseReportData[key] = originalData[key];
+        }
+      });
+
+      // Set new timestamps
+      baseReportData.createdAt = new Date().toISOString();
+      baseReportData.updatedAt = new Date().toISOString();
+
+      let copiedReportData;
+
+      if (copyType === "blank") {
+        // Blank Copy
+        console.log("Creating blank copy - clearing filled data...");
+        copiedReportData = {
+          ...baseReportData,
+          supplierFiledData: createBlankStructure(
+            originalData.supplierFiledData || originalData.blankReportData,
+            item.dataSource
+          ),
+          customerFiledData: null,
+          measurementData: createBlankStructure(
+            originalData.measurementData,
+            item.dataSource
+          ),
+          inspectionResults: null,
+          testResults: null,
+          qualityData: null,
+
+          reportName: `${
+            originalData.reportName || `${item.dataSource} Report`
+          } (Blank Copy)`,
+          drawingNo: originalData.drawingNo
+            ? `${originalData.drawingNo} (Blank)`
+            : null,
+          customerDrawingNo: originalData.customerDrawingNo
+            ? `${originalData.customerDrawingNo} (Blank)`
+            : null,
+          identification: originalData.identification
+            ? `${originalData.identification} (Blank)`
+            : null,
+          customerIdentification: originalData.customerIdentification
+            ? `${originalData.customerIdentification} (Blank)`
+            : null,
+          testRepNo: originalData.testRepNo
+            ? `${originalData.testRepNo} (Blank)`
+            : null,
+          partSubNoCavity: originalData.partSubNoCavity
+            ? `${originalData.partSubNoCavity} (Blank)`
+            : null,
+        };
+      } else {
+        // Filled Copy
+        console.log("Creating filled copy - preserving all data...");
+        copiedReportData = {
+          ...baseReportData,
+          supplierFiledData: preserveAllFilledData(
+            originalData.supplierFiledData
+          ),
+          customerFiledData: preserveAllFilledData(
+            originalData.customerFiledData
+          ),
+          blankReportData: preserveAllFilledData(originalData.blankReportData),
+
+          measurementData: preserveAllFilledData(originalData.measurementData),
+          inspectionResults: preserveAllFilledData(
+            originalData.inspectionResults
+          ),
+          testResults: preserveAllFilledData(originalData.testResults),
+          qualityData: preserveAllFilledData(originalData.qualityData),
+
+          reportSettings: preserveAllFilledData(originalData.reportSettings),
+          checkboxStates: preserveAllFilledData(originalData.checkboxStates),
+          formData: preserveAllFilledData(originalData.formData),
+
+          reportName: `${
+            originalData.reportName || `${item.dataSource} Report`
+          } (Copy)`,
+          drawingNo: originalData.drawingNo
+            ? `${originalData.drawingNo} (Copy)`
+            : null,
+          customerDrawingNo: originalData.customerDrawingNo
+            ? `${originalData.customerDrawingNo} (Copy)`
+            : null,
+          identification: originalData.identification
+            ? `${originalData.identification} (Copy)`
+            : null,
+          customerIdentification: originalData.customerIdentification
+            ? `${originalData.customerIdentification} (Copy)`
+            : null,
+          testRepNo: originalData.testRepNo
+            ? `${originalData.testRepNo} (Copy)`
+            : null,
+          partSubNoCavity: originalData.partSubNoCavity
+            ? `${originalData.partSubNoCavity} (Copy)`
+            : null,
+        };
+      }
+
+      console.log("Complete copied report data:", {
+        copyType,
+        originalDataKeys: Object.keys(originalData),
+        copiedDataKeys: Object.keys(copiedReportData),
+        supplierDataSize: copiedReportData.supplierFiledData?.length || 0,
+      });
+
+      // Dispatch to backend
+      let result;
+      if (item.dataSource === "FI") {
+        result = await dispatch(createFIReport(copiedReportData)).unwrap();
+      } else if (item.dataSource === "IS") {
+        result = await dispatch(createISReport(copiedReportData)).unwrap();
+      }
+
+      // Success feedback
+      const copyTypeText =
+        copyType === "blank" ? "Blank Template" : "Complete Filled Report";
+      const detailsText =
+        copyType === "filled"
+          ? " (including all measurements and data)"
+          : " (structure only, no data)";
+
+      alert(`${copyTypeText} copied successfully!${detailsText}`);
+
+      // Refresh lists
+      dispatch(fetchFIReports());
+      dispatch(fetchISReports());
+
+      // Navigate to edit page if user confirms
+      if (result && result.id) {
+        const confirmEdit = window.confirm(
+          `${copyTypeText} created successfully! Would you like to open it for editing?`
+        );
+        if (confirmEdit) {
+          if (item.dataSource === "FI") {
+            window.location.href = `/fi-report/${result.id}?mode=edit`;
+          } else {
+            window.location.href = `/is-report/${result.id}?mode=edit`;
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Failed to copy report:", error);
+
+      const errorDetails = {
+        message: error.message || "Unknown error",
+        originalDataKeys: Object.keys(item.originalData || {}),
+        copyType,
+        reportType: item.reportType,
+      };
+
+      console.error("Copy error details:", errorDetails);
+      alert(
+        `Failed to copy ${item.reportType}: ${
+          error.message || "Unknown error occurred"
+        }`
+      );
+    }
+  };
   const handleViewItem = (item) => {
     if (item.dataSource === "FI") {
       window.location.href = `/fi-report/${item.id}`;

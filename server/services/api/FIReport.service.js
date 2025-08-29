@@ -9,174 +9,129 @@ const { FIReport } = require("../../models"); // ✅ index.js માંથી im
 /**
  * Service class for handling FI Report database operations
  * Provides CRUD operations for FIReport model with error handling and logging
- *
- * @class FlReportService
- * @description Manages all database interactions for FI Reports including
- * create, read, update, delete operations with proper error handling
  */
 class FlReportService {
   /**
    * Create a new FIReport record in the database
-   *
-   * @async
-   * @method createFIReport
-   * @param {Object} data - The report data to create
-   * @param {string} [data.title] - Report title
-   * @param {string} [data.description] - Report description
-   * @param {string} [data.status] - Report status (draft, in_progress, completed)
-   * @param {string} [data.category] - Report category
-   * @param {Object} [data.metadata] - Additional report metadata
-   * @returns {Promise<Object>} The created report object as JSON
-   * @throws {Error} Throws error if report creation fails
-   *
-   * @example
-   * const reportData = {
-   *   title: "Financial Investigation Report",
-   *   description: "Investigation of suspicious transactions",
-   *   status: "draft",
-   *   category: "financial_crime"
-   * };
-   * const newReport = await service.createFIReport(reportData);
-   * console.log(newReport.id); // Newly created report ID
    */
   createFIReport = async (data) => {
     try {
+      console.log(
+        "💾 [Service] Creating FIReport with data:",
+        JSON.stringify(data, null, 2)
+      );
+
       const report = await FIReport.create(data);
-      return report.toJSON();
+      const result = report.toJSON();
+
+      console.log("✅ [Service] FIReport created successfully:", result.id);
+      return result;
     } catch (error) {
-      // console.error("❌ [Service] Failed to create FIReport:", error);
+      console.error("❌ [Service] Failed to create FIReport:", error);
       throw new Error(`Failed to create FIReport: ${error.message}`);
     }
   };
 
   /**
    * Retrieve all FIReport records from the database
-   *
-   * @async
-   * @method getAllFIReports
-   * @returns {Promise<Array<Object>>} Array of report objects as JSON
-   * @throws {Error} Throws error if fetching reports fails
-   *
-   * @example
-   * const allReports = await service.getAllFIReports();
-   * console.log(`Found ${allReports.length} reports`);
-   * allReports.forEach(report => {
-   *   console.log(`Report: ${report.title} - Status: ${report.status}`);
-   * });
    */
   getAllFIReports = async () => {
     try {
-      // console.log("📌 [Service] getAllFIReports called");
+      console.log("📌 [Service] getAllFIReports called");
 
       const reports = await FIReport.findAll();
-      // console.log("✅ [Service] Raw reports from DB:", reports);
+      console.log("✅ [Service] Raw reports from DB:", reports.length);
 
       if (!reports || reports.length === 0) {
-        // console.log("⚠️ [Service] No reports found in DB");
+        console.log("⚠️ [Service] No reports found in DB");
         return [];
       }
 
       const filteredReports = reports.map((report) => report.toJSON());
-      // console.log("✅ [Service] Filtered Reports:", filteredReports);
+      console.log("✅ [Service] Filtered Reports:", filteredReports.length);
 
       return filteredReports;
     } catch (error) {
-      // console.error("❌ [Service] Error in getAllFIReports:", error);
+      console.error("❌ [Service] Error in getAllFIReports:", error);
       throw new Error(error.message || "Failed to fetch reports");
     }
   };
 
   /**
    * Retrieve a single FIReport by its primary key ID
-   *
-   * @async
-   * @method getFIReportById
-   * @param {string|number} id - The unique identifier of the report
-   * @returns {Promise<Object>} The report object as JSON
-   * @throws {Error} Throws "FIReport not found" if report doesn't exist
-   * @throws {Error} Throws error if database operation fails
-   *
-   * @example
-   * try {
-   *   const report = await service.getFIReportById(123);
-   *   console.log(`Found report: ${report.title}`);
-   *   console.log(`Created: ${report.created_at}`);
-   * } catch (error) {
-   *   if (error.message === "FIReport not found") {
-   *     console.log("Report does not exist");
-   *   }
-   * }
    */
   getFIReportById = async (id) => {
     try {
+      console.log("🔍 [Service] Fetching FIReport by ID:", id);
+
       const report = await FIReport.findByPk(id);
-      if (!report) throw new Error("FIReport not found");
-      return report.toJSON();
+      if (!report) {
+        console.log("❌ [Service] FIReport not found for ID:", id);
+        throw new Error("FIReport not found");
+      }
+
+      const result = report.toJSON();
+      console.log("✅ [Service] FIReport found:", result.id);
+      return result;
     } catch (error) {
-      // console.error("❌ [Service] Failed to fetch FIReport:", error);
+      console.error("❌ [Service] Failed to fetch FIReport:", error);
       throw new Error(`Failed to fetch FIReport: ${error.message}`);
     }
   };
 
   /**
    * Update an existing FIReport by ID
-   *
-   * @async
-   * @method updateFIReport
-   * @param {string|number} id - The unique identifier of the report to update
-   * @param {Object} data - The updated report data
-   * @param {string} [data.title] - Updated report title
-   * @param {string} [data.description] - Updated report description
-   * @param {string} [data.status] - Updated report status
-   * @param {string} [data.category] - Updated report category
-   * @param {Object} [data.metadata] - Updated report metadata
-   * @returns {Promise<Object>} The updated report object as JSON
-   * @throws {Error} Throws "FIReport not found" if report doesn't exist
-   * @throws {Error} Throws error if update operation fails
-   *
-   * @example
-   * const updateData = {
-   *   status: "completed",
-   *   description: "Investigation completed with findings"
-   * };
-   * const updatedReport = await service.updateFIReport(123, updateData);
-   * console.log(`Report updated: ${updatedReport.title}`);
+   */
+  /**
+   * Update an existing FIReport by ID
+   * Now properly handles null values to overwrite existing data
    */
   updateFIReport = async (id, data) => {
     try {
-      const report = await FIReport.findByPk(id);
-      if (!report) throw new Error("FIReport not found");
+      console.log("🔄 [Service] Updating FIReport ID:", id);
+      console.log("🔄 [Service] Update data:", JSON.stringify(data, null, 2));
 
-      await report.update(data);
-      await report.reload();
-      return report.toJSON();
+      const report = await FIReport.findByPk(id);
+      if (!report) {
+        console.log("❌ [Service] FIReport not found for update, ID:", id);
+        throw new Error("FIReport not found");
+      }
+
+      console.log("🔍 [Service] Found existing report:", report.id);
+
+      // Use the update method with explicit null handling
+      const [updatedRowsCount] = await FIReport.update(data, {
+        where: { id: id },
+        // This ensures null values overwrite existing data
+        individualHooks: false, // Better performance for single updates
+        // Don't exclude null values - let them update the database
+        fields: Object.keys(data), // Explicitly specify which fields to update
+      });
+
+      console.log("📊 [Service] Updated rows count:", updatedRowsCount);
+
+      if (updatedRowsCount === 0) {
+        console.log("⚠️ [Service] No rows were updated");
+        throw new Error("No rows were updated");
+      }
+
+      // Fetch the updated report to return latest data
+      const updatedReport = await FIReport.findByPk(id);
+      if (!updatedReport) {
+        throw new Error("Failed to fetch updated report");
+      }
+
+      const result = updatedReport.toJSON();
+      console.log("✅ [Service] FIReport updated successfully:", result.id);
+
+      return result;
     } catch (error) {
-      // console.error("❌ [Service] Failed to update FIReport:", error);
+      console.error("❌ [Service] Failed to update FIReport:", error);
       throw new Error(`Failed to update FIReport: ${error.message}`);
     }
   };
-
   /**
    * Delete a FIReport by ID
-   *
-   * @async
-   * @method deleteFIReport
-   * @param {string|number} id - The unique identifier of the report to delete
-   * @returns {Promise<Object>} Success response object
-   * @returns {boolean} returns.success - Always true for successful deletion
-   * @returns {string} returns.message - Success message
-   * @throws {Error} Throws "FIReport not found" if report doesn't exist
-   * @throws {Error} Throws error if deletion fails
-   *
-   * @example
-   * try {
-   *   const result = await service.deleteFIReport(123);
-   *   console.log(result.message); // "FIReport deleted successfully"
-   * } catch (error) {
-   *   if (error.message === "FIReport not found") {
-   *     console.log("Cannot delete - report does not exist");
-   *   }
-   * }
    */
   deleteFIReport = async (id) => {
     try {
@@ -186,7 +141,7 @@ class FlReportService {
       await report.destroy();
       return { success: true, message: "FIReport deleted successfully" };
     } catch (error) {
-      // console.error("❌ [Service] Failed to delete FIReport:", error);
+      console.error("❌ [Service] Failed to delete FIReport:", error);
       throw new Error(`Failed to delete FIReport: ${error.message}`);
     }
   };

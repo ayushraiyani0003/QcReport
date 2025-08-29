@@ -1,6 +1,117 @@
+"use client";
+
 import { useState, useEffect, useRef } from "react";
 import CustomButton from "../../Componant/CustomButton";
 import { useFIReport } from "../../feature/FIReport/hooks/useFireport";
+
+// Enhanced parseDrawingValue function with comprehensive tolerance handling
+function parseDrawingValue(value) {
+  if (!value || typeof value !== "string") {
+    return {
+      actualValue: "",
+      tolerancePlus: "",
+      toleranceMinus: "",
+    };
+  }
+
+  const trimmedValue = value.trim();
+
+  // Pattern 1: "25.5 ± 0.1" or "25.5±0.1" (symmetric tolerance)
+  const symmetricPattern = /^([\d.]+)\s*[±]\s*([\d.]+)$/;
+  const symmetricMatch = trimmedValue.match(symmetricPattern);
+
+  if (symmetricMatch) {
+    const actualValue = Number.parseFloat(symmetricMatch[1]);
+    const tolerance = Number.parseFloat(symmetricMatch[2]);
+
+    return {
+      actualValue: actualValue.toString(),
+      tolerancePlus: (actualValue + tolerance).toString(),
+      toleranceMinus: (actualValue - tolerance).toString(),
+    };
+  }
+
+  // Pattern 2: "25.5 +0.2/-0.1" or "25.5+0.2/-0.1" (asymmetric tolerance)
+  const asymmetricPattern = /^([\d.]+)\s*\+?([\d.]+)\s*\/\s*-?([\d.]+)$/;
+  const asymmetricMatch = trimmedValue.match(asymmetricPattern);
+
+  if (asymmetricMatch) {
+    const actualValue = Number.parseFloat(asymmetricMatch[1]);
+    const plusTolerance = Number.parseFloat(asymmetricMatch[2]);
+    const minusTolerance = Number.parseFloat(asymmetricMatch[3]);
+
+    return {
+      actualValue: actualValue.toString(),
+      tolerancePlus: (actualValue + plusTolerance).toString(),
+      toleranceMinus: (actualValue - minusTolerance).toString(),
+    };
+  }
+
+  // Pattern 3: "25.5 +0.1" (only plus tolerance)
+  const plusOnlyPattern = /^([\d.]+)\s*\+\s*([\d.]+)$/;
+  const plusOnlyMatch = trimmedValue.match(plusOnlyPattern);
+
+  if (plusOnlyMatch) {
+    const actualValue = Number.parseFloat(plusOnlyMatch[1]);
+    const tolerance = Number.parseFloat(plusOnlyMatch[2]);
+
+    return {
+      actualValue: actualValue.toString(),
+      tolerancePlus: (actualValue + tolerance).toString(),
+      toleranceMinus: actualValue.toString(), // Same as actual value
+    };
+  }
+
+  // Pattern 4: "25.5 -0.1" (only minus tolerance)
+  const minusOnlyPattern = /^([\d.]+)\s*-\s*([\d.]+)$/;
+  const minusOnlyMatch = trimmedValue.match(minusOnlyPattern);
+
+  if (minusOnlyMatch) {
+    const actualValue = Number.parseFloat(minusOnlyMatch[1]);
+    const tolerance = Number.parseFloat(minusOnlyMatch[2]);
+
+    return {
+      actualValue: actualValue.toString(),
+      tolerancePlus: actualValue.toString(), // Same as actual value
+      toleranceMinus: (actualValue - tolerance).toString(),
+    };
+  }
+
+  // Pattern 5: Range format "25.0-25.5" or "25.0 - 25.5"
+  const rangePattern = /^([\d.]+)\s*-\s*([\d.]+)$/;
+  const rangeMatch = trimmedValue.match(rangePattern);
+
+  if (rangeMatch) {
+    const minValue = Number.parseFloat(rangeMatch[1]);
+    const maxValue = Number.parseFloat(rangeMatch[2]);
+    const actualValue = (minValue + maxValue) / 2; // Use middle value as actual
+
+    return {
+      actualValue: actualValue.toString(),
+      tolerancePlus: maxValue.toString(),
+      toleranceMinus: minValue.toString(),
+    };
+  }
+
+  // Pattern 6: Just a number "25.5" (no tolerance)
+  const numberOnlyPattern = /^[\d.]+$/;
+  if (numberOnlyPattern.test(trimmedValue)) {
+    const actualValue = Number.parseFloat(trimmedValue);
+
+    return {
+      actualValue: actualValue.toString(),
+      tolerancePlus: actualValue.toString(),
+      toleranceMinus: actualValue.toString(),
+    };
+  }
+
+  // If no pattern matches, return the original value as actual value
+  return {
+    actualValue: trimmedValue,
+    tolerancePlus: "",
+    toleranceMinus: "",
+  };
+}
 
 export default function FIReport() {
   const {
@@ -15,10 +126,15 @@ export default function FIReport() {
     handleCancel,
     handleSave,
     isEditMode,
+    clearCharacteristicsOnly,
+    clearActualMeasurementsOnly,
+    clearAllData,
   } = useFIReport();
 
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showClearDropdown, setShowClearDropdown] = useState(false);
   const dropdownRef = useRef(null);
+  const clearDropdownRef = useRef(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -26,16 +142,22 @@ export default function FIReport() {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setShowDropdown(false);
       }
+      if (
+        clearDropdownRef.current &&
+        !clearDropdownRef.current.contains(event.target)
+      ) {
+        setShowClearDropdown(false);
+      }
     };
 
-    if (showDropdown) {
+    if (showDropdown || showClearDropdown) {
       document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [showDropdown]);
+  }, [showDropdown, showClearDropdown]);
 
   const handleDownloadFilled = () => {
     console.log("Downloading filled report...");
@@ -47,6 +169,39 @@ export default function FIReport() {
     console.log("Downloading blank report...");
     alert("Blank report download functionality will be implemented");
     setShowDropdown(false);
+  };
+
+  const handleClearCharacteristics = () => {
+    if (
+      window.confirm(
+        "Are you sure you want to clear all characteristics data? This will reset details, drawing values, methods, tolerances, and all measurements."
+      )
+    ) {
+      clearCharacteristicsOnly();
+    }
+    setShowClearDropdown(false);
+  };
+
+  const handleClearMeasurements = () => {
+    if (
+      window.confirm(
+        "Are you sure you want to clear all actual measurements? This will reset P1-P5 and customer measurement values."
+      )
+    ) {
+      clearActualMeasurementsOnly();
+    }
+    setShowClearDropdown(false);
+  };
+
+  const handleClearAll = () => {
+    if (
+      window.confirm(
+        "Are you sure you want to clear ALL data? This will reset the entire form to blank state."
+      )
+    ) {
+      clearAllData();
+    }
+    setShowClearDropdown(false);
   };
 
   if (isEditMode && loading) {
@@ -98,10 +253,10 @@ export default function FIReport() {
             </CustomButton>
 
             {showDropdown && (
-              <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-300 rounded-md shadow-lg z-10">
+              <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-500 rounded-md shadow-lg z-10">
                 <button
                   onClick={handleDownloadFilled}
-                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 border-b border-gray-200"
+                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 border-b border-gray-300"
                 >
                   Download Filled Report
                 </button>
@@ -115,11 +270,61 @@ export default function FIReport() {
             )}
           </div>
 
+          <div className="relative" ref={clearDropdownRef}>
+            <CustomButton
+              onClick={() => setShowClearDropdown(!showClearDropdown)}
+              variant="warning"
+              size="medium"
+              className="flex items-center gap-2"
+            >
+              CLEAR
+              <svg
+                className={`w-4 h-4 transition-transform ${
+                  showClearDropdown ? "rotate-180" : ""
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </CustomButton>
+
+            {showClearDropdown && (
+              <div className="absolute top-full left-0 mt-1 w-56 bg-white border border-gray-500 rounded-md shadow-lg z-10">
+                <button
+                  onClick={handleClearCharacteristics}
+                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 border-b border-gray-300"
+                >
+                  Clear Characteristics Only
+                </button>
+                <button
+                  onClick={handleClearMeasurements}
+                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 border-b border-gray-300"
+                >
+                  Clear Actual Measurements Only
+                </button>
+                <button
+                  onClick={handleClearAll}
+                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                >
+                  Clear All Data
+                </button>
+              </div>
+            )}
+          </div>
+
           <CustomButton onClick={handleCancel} variant="danger" size="medium">
             CANCEL
           </CustomButton>
         </div>
       </div>
+
       <div className="p-4 max-w-[1600px] mx-auto">
         <div ref={pdfRef}>
           <div className="flex justify-between items-center pt-3">
@@ -170,26 +375,44 @@ export default function FIReport() {
                 <br />
                 <label>
                   <span className="me-2">11)</span>
-                  <input type="checkbox" id="materials-bought-parts" />
+                  <input
+                    type="checkbox"
+                    id="materials-bought-parts"
+                    className="mr-2"
+                  />
                   Materials in Bought Parts
                 </label>
               </div>
             </div>
             <div>
               <label className="block mb-1">
-                <input type="checkbox" defaultChecked id="initial-sample-vda" />
+                <input
+                  type="checkbox"
+                  className="mr-2"
+                  defaultChecked
+                  id="initial-sample-vda"
+                />
                 Initial Sample Report VDA
               </label>
               <label className="block ml-5 mb-1">
-                <input type="checkbox" defaultChecked id="first-sample" />
+                <input
+                  type="checkbox"
+                  className="mr-2"
+                  defaultChecked
+                  id="first-sample"
+                />
                 First Sample
               </label>
               <label className="block ml-5 mb-1">
-                <input type="checkbox" id="following-sample" />
+                <input type="checkbox" className="mr-2" id="following-sample" />
                 Following sample report
               </label>
               <label className="block mb-1">
-                <input type="checkbox" id="test-report-other" />
+                <input
+                  type="checkbox"
+                  className="mr-2"
+                  id="test-report-other"
+                />
                 <strong> Test report of other samples</strong>
               </label>
             </div>
@@ -307,32 +530,62 @@ export default function FIReport() {
             </div>
           </div>
 
-          <table className="w-full mt-4 border text-sm border-collapse">
-            <thead>
+          <table className="w-full mt-4 border-collapse border border-gray-500">
+            <thead className="bg-gray-50">
               <tr>
-                <th rowSpan={2} className="border px-2 py-1">
+                <th
+                  rowSpan={2}
+                  className="border border-gray-500 px-3 py-2 text-center font-semibold"
+                >
                   No.
                 </th>
-                <th colSpan={6} className="border px-2 py-1 text-center">
+                <th
+                  colSpan={6}
+                  className="border border-gray-500 px-3 py-2 text-center font-semibold"
+                >
                   Characteristic / Nominal Value / Tolerance / Unit / Test
                   Method
                 </th>
-                <th colSpan={5} className="border px-2 py-1 text-center">
+                <th
+                  colSpan={5}
+                  className="border border-gray-500 px-3 py-2 text-center font-semibold"
+                >
                   Actual / Observed value [ in mm or Degree ] Supplier
                 </th>
-                <th colSpan={5} className="border px-2 py-1 text-center">
+                <th
+                  colSpan={5}
+                  className="border border-gray-500 px-3 py-2 text-center font-semibold max-w-10"
+                >
                   Actual value Customer
                 </th>
               </tr>
               <tr>
-                <th className="border px-2 py-1">Details</th>
-                <th className="border px-2 py-1">Drawing Value</th>
-                <th className="border px-2 py-1">Test Method</th>
-                <th className="border px-2 py-1">Actual Value</th>
-                <th className="border px-2 py-1">Actual Tolerance (+)</th>
-                <th className="border px-2 py-1">Actual Tolerance (−)</th>
+                <th className="border border-gray-500 px-3 py-2 text-center font-medium w-40">
+                  Details
+                </th>
+                <th className="border border-gray-500 px-3 py-2 text-center font-medium w-40">
+                  Drawing Value
+                </th>
+                <th className="border border-gray-500 px-3 py-2 text-center font-medium w-40">
+                  Test Method
+                </th>
+
+                <th className="border border-gray-500 px-3 py-2 text-center font-medium">
+                  Actual Value
+                </th>
+                <th className="border border-gray-500 px-3 py-2 text-center font-medium">
+                  Actual Tolerance (+)
+                </th>
+                <th className="border border-gray-500 px-3 py-2 text-center font-medium">
+                  Actual Tolerance (−)
+                </th>
                 {[...Array(10)].map((_, i) => (
-                  <th key={i} className="border px-2 py-1">
+                  <th
+                    key={i}
+                    className={`border border-gray-500 px-3 py-2 text-center font-medium  ${
+                      i < 5 ? "min-w-[80px]" : ""
+                    }`}
+                  >
                     {i < 5 ? `P${i + 1}` : `${i - 4}`}
                   </th>
                 ))}
@@ -340,10 +593,15 @@ export default function FIReport() {
             </thead>
             <tbody>
               {rows.map((row, rIdx) => (
-                <tr key={rIdx}>
-                  <td className="border px-2 py-1 text-center">{rIdx + 1}</td>
+                <tr
+                  key={rIdx}
+                  className={rIdx % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                >
+                  <td className="border border-gray-500 px-3 py-2 text-center font-medium">
+                    {rIdx + 1}
+                  </td>
 
-                  <td className="border px-2 py-1 w-[200px]">
+                  <td className="border border-gray-500 p-1">
                     <input
                       id={`cell-${rIdx}-details`}
                       value={row.details ?? ""}
@@ -353,41 +611,20 @@ export default function FIReport() {
                         setRows(newRows);
                       }}
                       onKeyDown={(e) => handleKeyPress(e, rIdx, "details")}
-                      className="w-full border px-1 py-0.5"
+                      className="w-full h-8 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:border-blue-400"
                     />
                   </td>
 
-                  <td className="border px-2 py-1 w-[180px]">
+                  <td className="border border-gray-500 p-1">
                     <input
                       id={`cell-${rIdx}-drawing`}
                       value={row.drawing ?? ""}
                       onChange={(e) => {
                         const newRows = [...rows];
-                        newRows[rIdx].drawing = e.target.value;
+                        const newValue = e.target.value;
+                        newRows[rIdx].drawing = newValue;
 
-                        function parseDrawingValue(value) {
-                          const match = value.match(
-                            /^([\d.]+)\s*±\s*([\d.]+)$/
-                          );
-
-                          if (match) {
-                            const actualValue = Number.parseFloat(match[1]);
-                            const tolerance = Number.parseFloat(match[2]);
-
-                            return {
-                              actualValue,
-                              tolerancePlus: actualValue + tolerance,
-                              toleranceMinus: actualValue - tolerance,
-                            };
-                          }
-                          return {
-                            actualValue: value,
-                            tolerancePlus: null,
-                            toleranceMinus: null,
-                          };
-                        }
-
-                        const parsed = parseDrawingValue(e.target.value);
+                        const parsed = parseDrawingValue(newValue);
 
                         if (!newRows[rIdx].actualValueManuallyEdited) {
                           newRows[rIdx].actualValue = parsed.actualValue;
@@ -398,14 +635,16 @@ export default function FIReport() {
                         if (!newRows[rIdx].toleranceMinusManuallyEdited) {
                           newRows[rIdx].toleranceMinus = parsed.toleranceMinus;
                         }
+
                         setRows(newRows);
                       }}
                       onKeyDown={(e) => handleKeyPress(e, rIdx, "drawing")}
-                      className="w-full border px-1 py-0.5"
+                      className="w-full h-8 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:border-blue-400"
+                      title="Supported formats: 25.5 ± 0.1, 25.5 +0.2/-0.1, 25.5 +0.1, 25.5 -0.1, 25.0-25.5, 25.5"
                     />
                   </td>
 
-                  <td className="border px-2 py-1 w-[200px]">
+                  <td className="border border-gray-500 p-1">
                     <input
                       id={`cell-${rIdx}-method`}
                       value={row.method ?? ""}
@@ -415,11 +654,11 @@ export default function FIReport() {
                         setRows(newRows);
                       }}
                       onKeyDown={(e) => handleKeyPress(e, rIdx, "method")}
-                      className="w-full border px-1 py-0.5"
+                      className="w-full h-8 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:border-blue-400"
                     />
                   </td>
 
-                  <td className="border px-2 py-1 w-[120px]">
+                  <td className="border border-gray-500 p-1">
                     <input
                       id={`cell-${rIdx}-actualValue`}
                       value={row.actualValue ?? ""}
@@ -430,11 +669,12 @@ export default function FIReport() {
                         setRows(newRows);
                       }}
                       onKeyDown={(e) => handleKeyPress(e, rIdx, "actualValue")}
-                      className="w-full border px-1 py-0.5"
+                      className="w-full h-8 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:border-blue-400"
+                      title="Auto-calculated from Drawing Value (editable)"
                     />
                   </td>
 
-                  <td className="border px-2 py-1 w-[100px]">
+                  <td className="border border-gray-500 p-1">
                     <input
                       id={`cell-${rIdx}-tolerancePlus`}
                       value={row.tolerancePlus ?? ""}
@@ -447,11 +687,12 @@ export default function FIReport() {
                       onKeyDown={(e) =>
                         handleKeyPress(e, rIdx, "tolerancePlus")
                       }
-                      className="w-full border px-1 py-0.5"
+                      className="w-full h-8 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:border-blue-400"
+                      title="Auto-calculated from Drawing Value (editable)"
                     />
                   </td>
 
-                  <td className="border px-2 py-1 w-[100px]">
+                  <td className="border border-gray-500 p-1">
                     <input
                       id={`cell-${rIdx}-toleranceMinus`}
                       value={row.toleranceMinus ?? ""}
@@ -464,24 +705,102 @@ export default function FIReport() {
                       onKeyDown={(e) =>
                         handleKeyPress(e, rIdx, "toleranceMinus")
                       }
-                      className="w-full border px-1 py-0.5"
+                      className="w-full h-8 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:border-blue-400"
+                      title="Auto-calculated from Drawing Value (editable)"
                     />
                   </td>
 
                   {[...Array(10)].map((_, tIdx) => {
                     const field = `value${tIdx}`;
+
+                    const isOutOfTolerance = () => {
+                      const currentValue = row[field];
+                      const tolerancePlus = row.tolerancePlus;
+                      const toleranceMinus = row.toleranceMinus;
+
+                      if (!currentValue || !tolerancePlus || !toleranceMinus) {
+                        return false;
+                      }
+
+                      const numCurrentValue = Number.parseFloat(currentValue);
+                      const numTolerancePlus = Number.parseFloat(tolerancePlus);
+                      const numToleranceMinus =
+                        Number.parseFloat(toleranceMinus);
+
+                      if (
+                        isNaN(numCurrentValue) ||
+                        isNaN(numTolerancePlus) ||
+                        isNaN(numToleranceMinus)
+                      ) {
+                        return false;
+                      }
+
+                      return (
+                        numCurrentValue > numTolerancePlus ||
+                        numCurrentValue < numToleranceMinus
+                      );
+                    };
+
+                    const outOfTolerance = isOutOfTolerance();
+
                     return (
-                      <td key={tIdx} className="border px-2 py-1">
-                        <input
+                      <td key={tIdx} className="border border-gray-500 p-1">
+                        <textarea
                           id={`cell-${rIdx}-${field}`}
                           value={row[field] ?? ""}
+                          rows={1}
                           onChange={(e) => {
                             const newRows = [...rows];
-                            newRows[rIdx][field] = e.target.value;
+                            const newValue = e.target.value;
+                            newRows[rIdx][field] = newValue;
+
+                            const tolerancePlus = newRows[rIdx].tolerancePlus;
+                            const toleranceMinus = newRows[rIdx].toleranceMinus;
+
+                            if (newValue && tolerancePlus && toleranceMinus) {
+                              const numNewValue = Number.parseFloat(newValue);
+                              const numTolerancePlus =
+                                Number.parseFloat(tolerancePlus);
+                              const numToleranceMinus =
+                                Number.parseFloat(toleranceMinus);
+
+                              if (
+                                !isNaN(numNewValue) &&
+                                !isNaN(numTolerancePlus) &&
+                                !isNaN(numToleranceMinus)
+                              ) {
+                                const isOutOfRange =
+                                  numNewValue > numTolerancePlus ||
+                                  numNewValue < numToleranceMinus;
+                                newRows[rIdx][`${field}_outOfTolerance`] =
+                                  isOutOfRange;
+                              } else {
+                                newRows[rIdx][
+                                  `${field}_outOfTolerance`
+                                ] = false;
+                              }
+                            } else {
+                              newRows[rIdx][`${field}_outOfTolerance`] = false;
+                            }
+
                             setRows(newRows);
+
+                            e.target.style.height = "auto";
+                            e.target.style.height = `${e.target.scrollHeight}px`;
                           }}
                           onKeyDown={(e) => handleKeyPress(e, rIdx, field)}
-                          className="w-full border px-1 py-0.5"
+                          className={`w-full min-h-[32px] px-2 py-1 border rounded resize-none overflow-hidden focus:outline-none ${
+                            outOfTolerance
+                              ? "bg-red-100 border-red-400 focus:border-red-500"
+                              : "border-gray-300 focus:border-blue-400"
+                          }`}
+                          title={
+                            outOfTolerance
+                              ? `OUT OF TOLERANCE! Value must be between ${row.toleranceMinus} and ${row.tolerancePlus}`
+                              : row.tolerancePlus && row.toleranceMinus
+                              ? `Tolerance range: ${row.toleranceMinus} to ${row.tolerancePlus}`
+                              : ""
+                          }
                         />
                       </td>
                     );
@@ -496,7 +815,7 @@ export default function FIReport() {
             <br />
             <textarea
               rows="3"
-              className="w-full border px-2 py-1 mt-1"
+              className="w-full h-15  border px-2 py-1 mt-1 "
               id="remarks-supplier"
             ></textarea>
           </div>

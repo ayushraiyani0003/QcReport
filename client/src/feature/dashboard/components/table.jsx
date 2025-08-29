@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Edit2,
   Trash2,
-  Eye,
   Copy,
+  Eye,
   FileText,
   Shield,
   Clock,
@@ -14,11 +14,13 @@ const EnhancedTableComponent = ({
   reportData,
   onEdit,
   onDelete,
-  onView,
-  // onCopy,
+  // onView,
+  onCopy,
   formatDate,
   loading = false,
 }) => {
+  const [openDropdown, setOpenDropdown] = useState(null); // Track dropdown row
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -141,9 +143,6 @@ const EnhancedTableComponent = ({
 
                 <td className="px-6 py-4">
                   <div className="text-sm text-gray-900">{item.clientName}</div>
-                  {/* <div className="text-sm text-gray-500">
-                    #{item.clientNumber}
-                  </div> */}
                 </td>
 
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -160,16 +159,18 @@ const EnhancedTableComponent = ({
                   {getReportTypeBadge(item.reportType)}
                 </td>
 
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium relative">
                   <div className="flex items-center justify-end space-x-2">
-                    <button
+                    {/* <button
                       onClick={() => onView(item)}
                       className="text-indigo-600 hover:text-indigo-900 p-2 hover:bg-indigo-50 rounded-lg transition-colors duration-150"
                       title="View Report"
                     >
-                      <Eye className="w-4 h-4" />
-                    </button>
+                      {" "}
+                      <Eye className="w-4 h-4" />{" "}
+                    </button> */}
 
+                    {/* Edit */}
                     <button
                       onClick={() => onEdit(item)}
                       className="text-blue-600 hover:text-blue-900 p-2 hover:bg-blue-50 rounded-lg transition-colors duration-150"
@@ -178,14 +179,63 @@ const EnhancedTableComponent = ({
                       <Edit2 className="w-4 h-4" />
                     </button>
 
-                    {/* <button
-                      onClick={() => onCopy(item)}
-                      className="text-green-600 hover:text-green-900 p-2 hover:bg-green-50 rounded-lg transition-colors duration-150"
-                      title="Copy Report"
-                    >
-                      <Copy className="w-4 h-4" />
-                    </button> */}
+                    {/* Copy with enhanced dropdown */}
+                    <div className="relative">
+                      <button
+                        onClick={() =>
+                          setOpenDropdown(
+                            openDropdown === item.id ? null : item.id
+                          )
+                        }
+                        className="text-green-600 hover:text-green-900 p-2 hover:bg-green-50 rounded-lg transition-colors duration-150"
+                        title="Copy Report"
+                      >
+                        <Copy className="w-4 h-4" />
+                      </button>
 
+                      {openDropdown === item.id && (
+                        <div className="absolute right-0 mt-2 w-52 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                          <div className="py-1">
+                            <button
+                              onClick={() => {
+                                onCopy(item, "filled");
+                                setOpenDropdown(null);
+                              }}
+                              className="flex items-center w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors duration-150"
+                            >
+                              <FileText className="w-4 h-4 mr-3 text-blue-500" />
+                              <div>
+                                <div className="font-medium text-gray-900">
+                                  Copy Filled Report
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  Duplicate with all data
+                                </div>
+                              </div>
+                            </button>
+                            <button
+                              onClick={() => {
+                                onCopy(item, "blank");
+                                setOpenDropdown(null);
+                              }}
+                              className="flex items-center w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors duration-150"
+                            >
+                              <FileText className="w-4 h-4 mr-3 text-gray-400" />
+                              <div>
+                                <div className="font-medium text-gray-900">
+                                  Copy Blank Template
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  Structure only, no data
+                                </div>
+                              </div>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Delete */}
                     <button
                       onClick={() => onDelete(item)}
                       className="text-red-600 hover:text-red-900 p-2 hover:bg-red-50 rounded-lg transition-colors duration-150"
